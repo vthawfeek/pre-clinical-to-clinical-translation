@@ -1,0 +1,6 @@
+input_dim: 2000
+hidden_dims: [1024, 512, 256, 128]
+embed_dim: 64
+dropout_high: 0.3
+dropout_low: 0.2
+init_tau: 0.07

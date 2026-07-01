@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pctrans"
+version = "0.1.0"
+description = "Contrastive alignment of CCLE cell lines to TCGA patients via dual-tower InfoNCE"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.2.0",
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "pyarrow>=15.0",
+    "scikit-learn>=1.4",
+    "umap-learn>=0.5",
+    "numba>=0.59",
+    "llvmlite>=0.42",
+    "streamlit>=1.34",
+    "plotly>=5.20",
+    "mlflow>=2.12",
+    "typer>=0.12",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    "ipykernel>=6.0",
+    "harmonypy>=0.0.9,<2.0",
+]
+
+[project.scripts]
+pctrans-download   = "pctrans.scripts.download:app"
+pctrans-preprocess = "pctrans.scripts.preprocess:app"
+pctrans-train      = "pctrans.scripts.train:app"
+pctrans-evaluate   = "pctrans.scripts.evaluate:app"
+pctrans-query      = "pctrans.scripts.query:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pctrans"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.pytest.ini_options]
+addopts = "--tb=short"
+markers = [
+    "slow: marks tests that require real data (deselect with -m 'not slow')",
+    "integration: marks tests that require downloaded files",
+]
