@@ -30,3 +30,28 @@ def tiny_tcga():
 @pytest.fixture
 def tiny_model():
     return {"input_dim": 5, "hidden_dims": [16, 8], "embed_dim": 8, "dropout": 0.1}
+
+
+@pytest.fixture
+def tiny_ccle_meta():
+    return pd.DataFrame(
+        {
+            "ModelID": [f"ACH-{i:06d}" for i in range(6)],
+            "OncotreePrimaryDisease": [
+                "Melanoma",
+                "Non-Small Cell Lung Cancer",
+                "Invasive Breast Carcinoma",
+                "Glioblastoma",
+                "Melanoma",
+                "Non-Small Cell Lung Cancer",
+            ],
+            "OncotreeSubtype": [
+                "Melanoma",
+                "Lung Adenocarcinoma",
+                "Invasive Breast Carcinoma",
+                "Glioblastoma",
+                "Cutaneous Melanoma",
+                "Lung Squamous Cell Carcinoma",
+            ],
+        }
+    )

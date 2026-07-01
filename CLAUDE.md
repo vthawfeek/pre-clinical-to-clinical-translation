@@ -16,7 +16,8 @@ evaluation decision.
 ## Current status
 
 - Day 1: COMPLETE — scaffold pctrans package, pyproject.toml, CI workflow, stub modules, `/day` `/blog-draft` `/gate-check` slash commands
-- Day 2-14: PENDING
+- Day 2: COMPLETE — CCLE download client (DepMap 24Q4 via Figshare), lineage filter, Model.csv metadata parse
+- Day 3-14: PENDING
 
 ## Project
 
