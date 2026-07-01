@@ -2,6 +2,7 @@ import pandas as pd
 import typer
 
 from pctrans.data.ccle_client import CCLEClient, filter_lineages
+from pctrans.data.tcga_client import TCGAClient, filter_tcga_lineages
 
 app = typer.Typer()
 
@@ -37,7 +38,37 @@ def ccle(out_dir: str = "data/raw/ccle/"):
 
 @app.command()
 def tcga(out_dir: str = "data/raw/tcga/"):
-    raise NotImplementedError
+    """Download TCGA Pan-Cancer expression matrix + phenotype table from UCSC Xena, report lineage counts."""
+    client = TCGAClient()
+    expr_path = client.download_expression(out_dir)
+    pheno_path = client.download_phenotype(out_dir)
+
+    pheno = pd.read_csv(pheno_path, sep="\t")
+    typer.echo(f"Phenotype: {pheno_path} shape={pheno.shape}")
+    lineage_counts = {lineage: int(filter_tcga_lineages(pheno, [lineage]).sum()) for lineage in LINEAGES}
+    for lineage, count in lineage_counts.items():
+        typer.echo(f"  {lineage}: {count} patients")
+
+    # The expression matrix is ~1.5 GB uncompressed (genes as rows); avoid loading it
+    # fully into memory just to report its shape.
+    with open(expr_path, encoding="utf-8") as f:
+        header = f.readline().rstrip("\n").split("\t")
+    n_samples = len(header) - 1
+    with open(expr_path, encoding="utf-8") as f:
+        n_genes = sum(1 for _ in f) - 1  # minus header row
+    first_genes = pd.read_csv(expr_path, sep="\t", usecols=[0], nrows=3).iloc[:, 0].tolist()
+
+    typer.echo(f"Expression matrix: {expr_path} genes={n_genes} samples={n_samples}")
+    typer.echo(f"First 3 genes: {first_genes}")
+
+    return {
+        "expression_path": str(expr_path),
+        "phenotype_path": str(pheno_path),
+        "n_genes": n_genes,
+        "n_samples": n_samples,
+        "first_genes": first_genes,
+        "lineage_counts": lineage_counts,
+    }
 
 
 if __name__ == "__main__":

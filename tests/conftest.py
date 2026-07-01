@@ -55,3 +55,13 @@ def tiny_ccle_meta():
             ],
         }
     )
+
+
+@pytest.fixture
+def tiny_tcga_meta():
+    return pd.DataFrame(
+        {
+            "sample": [f"TCGA-{i:02d}-0001-01" for i in range(6)],
+            "cancer type abbreviation": ["LUAD", "BRCA", "SKCM", "GBM", "LUAD", "COAD"],
+        }
+    )

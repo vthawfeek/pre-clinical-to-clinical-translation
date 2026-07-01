@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from pctrans.data.ccle_client import filter_lineages
+from pctrans.data.tcga_client import filter_tcga_lineages
 
 
 def test_tiny_ccle_shape(tiny_ccle):
@@ -28,3 +29,37 @@ def test_ccle_expression_no_nan():
         pytest.skip("CCLE expression matrix not downloaded")
     head = pd.read_csv(path, index_col=0, nrows=10)
     assert not head.isna().any().any()
+
+
+def test_tcga_client_filter_lineages(tiny_tcga_meta):
+    filtered = filter_tcga_lineages(tiny_tcga_meta, ["LUAD", "BRCA", "SKCM"])
+    assert filtered.tolist() == [True, True, True, False, True, False]
+
+
+def test_tcga_client_filter_lineages_matched_labels(tiny_tcga_meta):
+    # PLAN.md's test asserts the *matched* labels are a subset of {LUAD, BRCA, SKCM};
+    # filter_tcga_lineages returns the boolean mask (consistent with filter_lineages
+    # above), so apply it before checking the label set.
+    filtered = filter_tcga_lineages(tiny_tcga_meta, ["LUAD", "BRCA", "SKCM"])
+    matched = tiny_tcga_meta.loc[filtered, "cancer type abbreviation"]
+    assert set(matched.unique()).issubset({"LUAD", "BRCA", "SKCM"})
+
+
+@pytest.mark.integration
+def test_tcga_expression_gene_count():
+    path = Path("data/raw/tcga/EB++AdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.xena")
+    if not path.exists():
+        pytest.skip("TCGA expression matrix not downloaded")
+    with open(path, encoding="utf-8") as f:
+        header = f.readline().rstrip("\n").split("\t")
+    assert len(header) > 1000
+
+
+@pytest.mark.integration
+def test_tcga_phenotype_has_target_lineages():
+    path = Path("data/raw/tcga/Survival_SupplementalTable_S1_20171025_xena_sp.tsv")
+    if not path.exists():
+        pytest.skip("TCGA phenotype table not downloaded")
+    pheno = pd.read_csv(path, sep="\t")
+    filtered = filter_tcga_lineages(pheno, ["LUAD", "BRCA", "SKCM"])
+    assert filtered.sum() > 0

@@ -17,7 +17,8 @@ evaluation decision.
 
 - Day 1: COMPLETE — scaffold pctrans package, pyproject.toml, CI workflow, stub modules, `/day` `/blog-draft` `/gate-check` slash commands
 - Day 2: COMPLETE — CCLE download client (DepMap 24Q4 via Figshare), lineage filter, Model.csv metadata parse
-- Day 3-14: PENDING
+- Day 3: COMPLETE — TCGA download client (UCSC Xena PANCAN via S3), phenotype lineage filter, gene-ID mismatch flagged for Day 4
+- Day 4-14: PENDING
 
 ## Project
 
