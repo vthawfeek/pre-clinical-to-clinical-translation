@@ -2,16 +2,18 @@
 
 ## Plan
 
-Full plan: [PLAN.md](PLAN.md) (also at `C:\Users\vthawfeek.Shajitha\.claude\plans\use-the-below-plan-concurrent-kahan.md` for plan mode)
+- Phase 1 (Days 1–14): [PLAN.md](PLAN.md) (also at `C:\Users\vthawfeek.Shajitha\.claude\plans\use-the-below-plan-concurrent-kahan.md` for plan mode)
+- Phase 2 (Days 15–25): [PLAN-phase2.md](PLAN-phase2.md) — rigorous validation (CIs, real baselines, 15-lineage task, purity confounder, label-shuffle control, vemurafenib/BRAF case study)
 
 ## How to trigger a day's work
 
-Type `/day N` where N is the day number (1-14).
+Type `/day N` where N is the day number (1-25). The `/day` command routes Days 1–14 to `PLAN.md`
+and Days 15–25 to `PLAN-phase2.md`.
 
-Each invocation executes all tasks for that day from PLAN.md, runs lint and tests, writes
-`reports/day-N-<topic>.md`, commits, and pushes to GitHub. On days 7 and 12 it also drafts
-blog/LinkedIn/X content via `/blog-draft N`. Run `/gate-check` any time to re-print the Gate 0/1
-evaluation decision.
+Each invocation executes all tasks for that day from the active plan file, runs lint and tests,
+writes `reports/day-N-<topic>.md`, commits, and pushes to GitHub. On blog-milestone days (7, 12, 25)
+it also drafts blog/LinkedIn/X content via `/blog-draft N`. Run `/gate-check` any time to re-print
+the Gate 0/1 (and, once Day 24 lands, Gate 2) evaluation decision.
 
 ## Current status
 
@@ -28,7 +30,21 @@ evaluation decision.
 - Day 11: COMPLETE — viz.py (umap_projection, lineage/domain scatter, TFS ranking bar, static + before/after renderers), pctrans-visualize CLI, embeddings_test.npz; UMAP + before/after + TFS figures rendered; outlier ACH-000264=Calu-6 (anaplastic NSCLC, TFS 0.662), bottom BRCA all TNBC/basal; tightness BRCA +0.861 > SKCM +0.802 > LUAD +0.787; 03_evaluation notebook (5 sections)
 - Day 12: COMPLETE — Streamlit app (app/streamlit_app.py: sidebar dropdown grouped by lineage, live UMAP with star-highlighted cell line + 5 nearest-patient hexagons, TFS gauge, neighbours table with tumour stage/histology), pctrans-precompute CLI → ccle_embeddings.npz (259 cell lines × 64-d) + app_meta.json (259 names, 339 TCGA annotations, deploy-safe); app runs on held-out test embeddings, AppTest render clean; lowest test TFS CALU6/ACH-000264 0.662 (no <0.4 case exists); blog-02 + LinkedIn-02 + X-thread-02 drafts
 - Day 13: COMPLETE — 5 docs (data pipeline, feature eng, architecture, training, evaluation), README with test-set results table + ASCII diagram; implemented TranslationEmbedder (inference/api.py) + pctrans-query CLI; new test_inference.py + test_pipeline.py (end-to-end train→evaluate→visualize→query on synthetic session fixture), download idempotency + save_filtered tests; coverage 54%→85% (target ≥80%), 79 tests pass
-- Day 14: PENDING
+- Day 14: COMPLETE — Phase 1 wrap + launch prep: requirements.txt (cross-platform runtime pins), notebooks/colab_quickstart.ipynb (download→train→UMAP), app data artefacts git-tracked (embeddings_test.npz, ccle_embeddings.npz, app_meta.json) for Streamlit Cloud, final code review (no hardcoded paths), v0.1.0 tag + GitHub release + repo topics; Phase 2 harness wired (`/day` routes 15–25 → PLAN-phase2.md). Manual/deferred: Streamlit Cloud connect + social posting (see reports/day-14-launch.md). Repo already public.
+
+## Phase 2 status (Days 15–25 — PLAN-phase2.md)
+
+- Day 15: PENDING — bootstrap + Wilson CIs, multi-seed reproducibility harness
+- Day 16: PENDING — train-only HVG selection, leakage-delta analysis
+- Day 17: PENDING — Harmony/ComBat/Scanorama baselines, supervised cross-domain ceiling
+- Day 18: PENDING — config-driven lineages, 15-lineage data + training run
+- Day 19: PENDING — 15-lineage evaluation, error-structure biology analysis
+- Day 20: PENDING — tumour-purity confounder analysis (stratified + residualised)
+- Day 21: PENDING — label-shuffle permutation negative control, empirical p-value
+- Day 22: PENDING — vemurafenib + BRAF mutation data assembly (DepMap/GDSC/MC3)
+- Day 23: PENDING — BRAF/vemurafenib placement + response-link case study
+- Day 24: PENDING — Gate 2 evaluation, phase2-summary, README/CLAUDE claims updated
+- Day 25: PENDING — blog-03 validation story, LinkedIn/X drafts, Phase 2 complete
 
 ## Project
 

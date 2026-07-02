@@ -10,7 +10,12 @@ mlruns/
 mlartifacts/
 mlflow.db
 data/raw/
-data/processed/
+# Ignore processed data, but track the small artefacts the Streamlit app loads
+# (glob the contents rather than the directory so the negations below can re-include).
+data/processed/*
+!data/processed/embeddings_test.npz
+!data/processed/ccle_embeddings.npz
+!data/processed/app_meta.json
 models/*.pt
 .env
 .DS_Store

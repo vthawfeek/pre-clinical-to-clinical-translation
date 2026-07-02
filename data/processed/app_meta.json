@@ -1,0 +1,1621 @@
+{
+  "ccle_names": {
+    "ACH-001339": "COLO794",
+    "ACH-001979": "NZM11",
+    "ACH-000327": "NCIH1395",
+    "ACH-000528": "ABC1",
+    "ACH-000828": "ZR7530",
+    "ACH-000765": "WM983B",
+    "ACH-000008": "A101D",
+    "ACH-000465": "SKMEL1",
+    "ACH-000117": "EFM192A",
+    "ACH-000017": "SKBR3",
+    "ACH-000587": "NCIH1975",
+    "ACH-000785": "NCIH2126",
+    "ACH-000554": "UACC893",
+    "ACH-000550": "IGR39",
+    "ACH-000276": "HCC38",
+    "ACH-000818": "BT483",
+    "ACH-000392": "CALU3",
+    "ACH-000856": "CAL51",
+    "ACH-000322": "HT144",
+    "ACH-002508": "WM3211",
+    "ACH-000638": "NCIH441",
+    "ACH-000223": "HCC1937",
+    "ACH-000632": "HS944T",
+    "ACH-000578": "HCC1171",
+    "ACH-000441": "SH4",
+    "ACH-000033": "NCIH1819",
+    "ACH-000019": "MCF7",
+    "ACH-001981": "NZM2",
+    "ACH-000330": "EFM19",
+    "ACH-000805": "COLO679",
+    "ACH-001975": "MM576",
+    "ACH-000725": "HCC202",
+    "ACH-000787": "LXF289",
+    "ACH-001704": "VMRCMELG",
+    "ACH-000580": "C32",
+    "ACH-000643": "HDQP1",
+    "ACH-000677": "SW1573",
+    "ACH-001568": "MM386",
+    "ACH-000711": "JIMT1",
+    "ACH-002847": "YUHOIN",
+    "ACH-000012": "HCC827",
+    "ACH-000945": "NCIH650",
+    "ACH-002458": "HT144SKINFV1",
+    "ACH-002846": "YUSEEPM163517",
+    "ACH-000248": "AU565",
+    "ACH-000282": "NCIH1755",
+    "ACH-000857": "CAL851",
+    "ACH-001569": "MM415",
+    "ACH-000814": "HS939T",
+    "ACH-002499": "UACC3199",
+    "ACH-001973": "MM485",
+    "ACH-001949": "MAMEL46",
+    "ACH-001980": "NZM12",
+    "ACH-000681": "A549",
+    "ACH-002005": "SKMEL19",
+    "ACH-000196": "HCC1599",
+    "ACH-000258": "DU4475",
+    "ACH-000691": "HCC2157",
+    "ACH-003456": "CCLFMELM0006T",
+    "ACH-000379": "NCIH1781",
+    "ACH-000109": "NCIH3255",
+    "ACH-000712": "HCC1833",
+    "ACH-000562": "HCC78",
+    "ACH-000066": "HCC4006",
+    "ACH-000374": "HCC1143",
+    "ACH-002003": "A375SKINCJ3",
+    "ACH-000148": "HS578T",
+    "ACH-002461": "RVH421SKINFV1",
+    "ACH-000314": "HCC2108",
+    "ACH-001705": "VP267",
+    "ACH-001041": "CHL1DM",
+    "ACH-001988": "NZM5",
+    "ACH-001392": "SUM185PE",
+    "ACH-000893": "NCIH1651",
+    "ACH-000799": "HS695T",
+    "ACH-000876": "MDAMB415",
+    "ACH-002650": "ETCC016",
+    "ACH-000668": "HCC70",
+    "ACH-002921": "BCK4",
+    "ACH-000590": "NCIH2073",
+    "ACH-001396": "SUM52PE",
+    "ACH-000339": "HCC461",
+    "ACH-001419": "VP229",
+    "ACH-001983": "NZM30",
+    "ACH-002511": "M140325",
+    "ACH-001389": "SUM1315MO2",
+    "ACH-000744": "NCIH1623",
+    "ACH-003455": "CCLFMELM0004T",
+    "ACH-000675": "NCIH1734",
+    "ACH-001683": "UACC3133",
+    "ACH-001990": "NZM7",
+    "ACH-003458": "CCLFMELM0010T",
+    "ACH-001985": "NZM40",
+    "ACH-000851": "MORCPR",
+    "ACH-000568": "UACC812",
+    "ACH-002460": "HT144SKINFV2",
+    "ACH-000111": "HCC1187",
+    "ACH-002928": "MM100511",
+    "ACH-000614": "RVH421",
+    "ACH-000014": "HS294T",
+    "ACH-000348": "RPMI7951",
+    "ACH-000621": "MDAMB157",
+    "ACH-000414": "NCIH1944",
+    "ACH-000755": "HCC2218",
+    "ACH-000028": "KPL1",
+    "ACH-001566": "MM370",
+    "ACH-000572": "G361",
+    "ACH-002522": "SNU2292",
+    "ACH-000277": "HCC1419",
+    "ACH-001239": "WM2664",
+    "ACH-001970": "MM253",
+    "ACH-000706": "EKVX",
+    "ACH-000425": "UACC62",
+    "ACH-001394": "SUM229PE",
+    "ACH-000404": "K029AX",
+    "ACH-000882": "IGR1",
+    "ACH-000458": "CJM",
+    "ACH-002084": "MMAC",
+    "ACH-001987": "NZM43",
+    "ACH-002526": "SNU1327",
+    "ACH-000951": "NCIH2342",
+    "ACH-001986": "NZM42",
+    "ACH-000721": "HMC18",
+    "ACH-000589": "NCIH1437",
+    "ACH-001522": "HMY1",
+    "ACH-000902": "CAL148",
+    "ACH-000264": "CALU6",
+    "ACH-000650": "IGR37",
+    "ACH-002404": "CCLFMELM0002T",
+    "ACH-000859": "HCC1954",
+    "ACH-001971": "MM466",
+    "ACH-000927": "BT474",
+    "ACH-001978": "NZM1",
+    "ACH-001984": "NZM4",
+    "ACH-001563": "MM127",
+    "ACH-000768": "MDAMB231",
+    "ACH-000667": "HCC44",
+    "ACH-002510": "M040416",
+    "ACH-000822": "SKMEL24",
+    "ACH-000349": "HCC1500",
+    "ACH-001662": "SNU2372",
+    "ACH-000812": "COLO783",
+    "ACH-000718": "NCIH2291",
+    "ACH-001393": "SUM190PT",
+    "ACH-002509": "WM4235",
+    "ACH-000021": "NCIH1693",
+    "ACH-000845": "NCIH1373",
+    "ACH-001982": "NZM3",
+    "ACH-000730": "SKMEL5",
+    "ACH-000573": "MDAMB436",
+    "ACH-001567": "MM383",
+    "ACH-000852": "NCIH1435",
+    "ACH-001976": "MM603",
+    "ACH-000661": "WM1799",
+    "ACH-001190": "SKMEL2",
+    "ACH-000448": "NCIH1666",
+    "ACH-000783": "CAMA1",
+    "ACH-002459": "HT144SKINFV3",
+    "ACH-001645": "SEKI",
+    "ACH-000304": "WM115",
+    "ACH-000931": "HMCB",
+    "ACH-000766": "NCIH1648",
+    "ACH-000343": "NCIH522",
+    "ACH-000774": "RERFLCAD2",
+    "ACH-000733": "NCIH1838",
+    "ACH-000810": "SKMEL30",
+    "ACH-000759": "MDAMB175VII",
+    "ACH-001972": "MM473",
+    "ACH-001953": "MAMEL27",
+    "ACH-003105": "VMM917",
+    "ACH-003012": "A549CRAFKD",
+    "ACH-002001": "A375SKINCJ1",
+    "ACH-000482": "RERFLCKJ",
+    "ACH-000450": "MELHO",
+    "ACH-000910": "MDAMB453",
+    "ACH-000779": "PC9",
+    "ACH-000423": "SKMEL3",
+    "ACH-000575": "HCC364",
+    "ACH-000451": "NCIH2085",
+    "ACH-000915": "IPC298",
+    "ACH-000161": "CORL105",
+    "ACH-000916": "NCIH1573",
+    "ACH-000837": "NCIH322",
+    "ACH-000881": "MELJUSO",
+    "ACH-000147": "T47D",
+    "ACH-000930": "HCC1569",
+    "ACH-000899": "WM88",
+    "ACH-000861": "HOP62",
+    "ACH-000884": "MDAMB435S",
+    "ACH-003459": "CCLFMELM0011T",
+    "ACH-001989": "NZM6",
+    "ACH-000757": "A427",
+    "ACH-000624": "HCC1806",
+    "ACH-000699": "HCC1395",
+    "ACH-000044": "MDAMB134VI",
+    "ACH-000447": "NCIH2228",
+    "ACH-000892": "NCIH1563",
+    "ACH-000477": "MALME3M",
+    "ACH-000352": "HCC1428",
+    "ACH-000416": "NCIH838",
+    "ACH-000401": "COLO800",
+    "ACH-000875": "NCIH2347",
+    "ACH-000841": "NCIH2087",
+    "ACH-000615": "SKMEL28",
+    "ACH-000801": "HS936T",
+    "ACH-001390": "SUM149PT",
+    "ACH-000860": "NCIH358",
+    "ACH-001388": "SUM102PT",
+    "ACH-001395": "SUM44PE",
+    "ACH-000311": "NCIH2122",
+    "ACH-000496": "NCIH1792",
+    "ACH-002512": "MM160113",
+    "ACH-000062": "RERFLCMS",
+    "ACH-000536": "BT20",
+    "ACH-002004": "UACC62SKINCJ1",
+    "ACH-000827": "WM793",
+    "ACH-001819": "MFM223",
+    "ACH-002401": "21MT2",
+    "ACH-000987": "MEWO",
+    "ACH-000212": "CAL120",
+    "ACH-000521": "NCIH2030",
+    "ACH-000274": "HS852T",
+    "ACH-000029": "HCC827GR5",
+    "ACH-000644": "COLO829",
+    "ACH-000849": "MDAMB468",
+    "ACH-000219": "A375",
+    "ACH-000150": "HCC2935",
+    "ACH-002531": "SNU2535",
+    "ACH-000869": "NCIH1568",
+    "ACH-000582": "COLO741",
+    "ACH-001570": "MM426",
+    "ACH-000337": "NCIH3122",
+    "ACH-000886": "NCIH2009",
+    "ACH-000888": "NCIH1793",
+    "ACH-000030": "PC14",
+    "ACH-002403": "CCLFMELM0001T",
+    "ACH-002497": "NCIH920",
+    "ACH-000925": "DV90",
+    "ACH-003457": "CCLFMELM0038T",
+    "ACH-000640": "SKMEL31",
+    "ACH-002002": "A375SKINCJ2",
+    "ACH-000097": "ZR751",
+    "ACH-000579": "UACC257",
+    "ACH-000788": "A2058",
+    "ACH-002405": "CCLFMELM0003T",
+    "ACH-000288": "BT549",
+    "ACH-001820": "COLO824",
+    "ACH-002399": "21NT",
+    "ACH-000791": "RERFLCAD1",
+    "ACH-001391": "SUM159PT",
+    "ACH-000900": "NCIH23",
+    "ACH-000666": "NCIH1355",
+    "ACH-000872": "HCC515",
+    "ACH-001974": "MM537",
+    "ACH-000121": "NCIH2405",
+    "ACH-000934": "MDAMB361",
+    "ACH-000781": "NCIH2023",
+    "ACH-000968": "COLO792",
+    "ACH-000750": "LOXIMVI"
+  },
+  "tcga_meta": {
+    "TCGA-A1-A0SP-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A1-A0SQ-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A04X-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0CP-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0CW-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0CY-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0D0-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0EU-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0EV-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0SU-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0SX-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A0T6-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-A2-A0YD-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-A2-A0YG-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A25A-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-A2-A3XU-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A3XV-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A2-A3Y0-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A0CG-01": {
+      "stage": "Stage IIA",
+      "histology": "Mixed Histology (please specify)"
+    },
+    "TCGA-A7-A0CH-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A0CH-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A0CJ-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A0D9-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A0DA-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A0DB-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A13G-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A26I-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A2KD-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A3RF-01": {
+      "stage": "Stage IIA",
+      "histology": "Mucinous Carcinoma"
+    },
+    "TCGA-A7-A425-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-A7-A6VW-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A7-A6VY-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A06T-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A06U-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A075-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A076-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A07S-01": {
+      "stage": "Stage IIA",
+      "histology": "Mixed Histology (please specify)"
+    },
+    "TCGA-A8-A082-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A08S-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A08X-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A097-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A099-01": {
+      "stage": "Stage X",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A09A-01": {
+      "stage": "Stage X",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A09D-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A09E-01": {
+      "stage": "Stage IIIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-A8-A09M-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AC-A3HN-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AC-A3W7-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AC-A7VC-01": {
+      "stage": "Stage IIB",
+      "histology": "Metaplastic Carcinoma"
+    },
+    "TCGA-AC-A8OS-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AN-A0AT-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AN-A0FY-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AN-A0XN-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AN-A0XU-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AO-A03O-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AO-A03R-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AO-A03U-01": {
+      "stage": "Stage I",
+      "histology": "Other, specify"
+    },
+    "TCGA-AO-A0J5-01": {
+      "stage": "Stage IV",
+      "histology": "Other, specify"
+    },
+    "TCGA-AO-A0J9-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AO-A0JB-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AO-A0JJ-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AO-A126-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AO-A128-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AO-A129-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AO-A1KT-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AQ-A04H-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AR-A0TQ-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AR-A0TS-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AR-A1AL-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AR-A1AM-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AR-A1AP-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AR-A1AT-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AR-A24S-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-AR-A24X-01": {
+      "stage": "Stage IIA",
+      "histology": "Mixed Histology (please specify)"
+    },
+    "TCGA-AR-A2LN-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AR-A5QN-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-AR-A5QP-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-B6-A0I8-01": {
+      "stage": "Stage X",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-B6-A0IC-01": {
+      "stage": "Stage X",
+      "histology": "Other, specify"
+    },
+    "TCGA-BH-A0B5-11": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-BH-A0B6-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0B9-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0BC-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0BC-11": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0BQ-11": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0C0-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0C7-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0DE-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0DH-11": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0DK-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0DL-11": {
+      "stage": "Stage IIA",
+      "histology": "Other, specify"
+    },
+    "TCGA-BH-A0DP-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-BH-A0DT-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0DV-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0H0-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0HL-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0HP-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-BH-A0HQ-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0HU-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A0HY-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18J-01": {
+      "stage": "Stage IV",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18J-11": {
+      "stage": "Stage IV",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18L-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18M-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18Q-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18R-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18T-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A18V-06": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A1ES-06": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A1ET-11": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A1EU-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A1EV-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A1F0-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A1FB-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A1FM-11": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A204-11": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A208-11": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A42T-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-BH-A6R8-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-BH-A6R9-01": {
+      "stage": "Stage IIA",
+      "histology": "Metaplastic Carcinoma"
+    },
+    "TCGA-BH-A8FY-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-C8-A12U-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-C8-A12Y-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-C8-A1HN-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-C8-A26W-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-C8-A26X-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-C8-A26Z-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-C8-A27B-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-C8-A3M8-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-D8-A13Y-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-D8-A1JG-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-D8-A1JN-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-D8-A1JS-01": {
+      "stage": "Stage IA",
+      "histology": "Other, specify"
+    },
+    "TCGA-D8-A1JU-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-D8-A1XF-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-D8-A1XK-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-D8-A1XZ-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-D8-A27I-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-D8-A27K-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A105-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A14U-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-E2-A14W-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A153-11": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A159-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A15G-01": {
+      "stage": "Stage IIA",
+      "histology": "Mixed Histology (please specify)"
+    },
+    "TCGA-E2-A15M-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-E2-A15P-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A15R-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A1IO-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A1L8-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-E2-A1LH-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E2-A2P6-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-E2-A3DX-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-E9-A1N4-11": {
+      "stage": "Stage IIIA",
+      "histology": "Mixed Histology (please specify)"
+    },
+    "TCGA-E9-A1ND-11": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E9-A1NF-11": {
+      "stage": "Stage IIA",
+      "histology": "Mixed Histology (please specify)"
+    },
+    "TCGA-E9-A1RD-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E9-A1RG-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E9-A1RH-11": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E9-A1RI-01": {
+      "stage": "Stage IIIA",
+      "histology": "Mixed Histology (please specify)"
+    },
+    "TCGA-E9-A226-01": {
+      "stage": "Stage IIIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E9-A24A-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-E9-A3HO-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-E9-A5FL-01": {
+      "stage": "Stage IIB",
+      "histology": "Metaplastic Carcinoma"
+    },
+    "TCGA-EW-A1J3-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-EW-A1OX-01": {
+      "stage": "Stage IIA",
+      "histology": "Mucinous Carcinoma"
+    },
+    "TCGA-EW-A1P0-01": {
+      "stage": "Stage IIB",
+      "histology": "Other, specify"
+    },
+    "TCGA-EW-A1P6-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-EW-A1PE-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-EW-A2FR-01": {
+      "stage": "Stage IIIC",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-EW-A423-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-EW-A6S9-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-EW-A6SC-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-EW-A6SD-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-GM-A2DF-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-GM-A2DL-01": {
+      "stage": "Stage I",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-LD-A9QF-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-LL-A440-01": {
+      "stage": "Stage IA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-LL-A5YL-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-LL-A5YN-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-OL-A66O-01": {
+      "stage": "Stage IIB",
+      "histology": "Infiltrating Ductal Carcinoma"
+    },
+    "TCGA-W8-A86G-01": {
+      "stage": "Stage IIA",
+      "histology": "Infiltrating Lobular Carcinoma"
+    },
+    "TCGA-05-4405-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-05-4430-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-05-5423-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-38-4631-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-38-4632-01": {
+      "stage": "Stage IV",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-44-2666-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-44-3398-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-44-5643-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-44-6145-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-44-6148-11": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-44-6774-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-44-6777-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-49-4501-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-49-4507-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-49-4510-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-49-4514-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-49-6744-01": {
+      "stage": "Stage IIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-49-AARO-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-49-AARR-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-50-5051-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-50-5931-11": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-50-5932-11": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-50-5933-01": {
+      "stage": "Stage IIIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-50-5935-11": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-50-5946-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-50-6590-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-53-7626-01": {
+      "stage": "Stage IIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-53-7813-01": {
+      "stage": "Stage IIIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-1595-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-6968-11": {
+      "stage": "Stage IV",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-6972-11": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-6980-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-6981-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-6986-11": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-7570-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-7815-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-7913-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8087-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8091-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8299-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8507-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8510-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8512-01": {
+      "stage": "Stage IV",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8513-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8514-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-8615-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-A48Z-01": {
+      "stage": "Stage IIIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-55-A4DF-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-62-8394-01": {
+      "stage": "Stage IIIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-64-5775-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-64-5778-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-67-6216-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-69-7980-01": {
+      "stage": "Stage I",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-69-8255-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-69-8453-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-73-A9RS-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-75-5146-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-75-6211-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-75-6214-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-75-7030-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-78-7154-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-78-7155-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-78-7158-01": {
+      "stage": "Stage IIIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-78-8648-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-86-8055-01": {
+      "stage": "Stage IIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-86-A4D0-01": {
+      "stage": "Stage IIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-86-A4P7-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-91-6831-11": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-91-6836-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-91-6840-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-91-6847-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-91-6849-01": {
+      "stage": "Stage IIIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-91-A4BC-01": {
+      "stage": "Stage IIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-93-8067-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-93-A4JN-01": {
+      "stage": "Stage IV",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-95-7567-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-95-7944-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-97-7547-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-97-A4LX-01": {
+      "stage": "Stage IB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-99-8032-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-J2-8192-01": {
+      "stage": "Stage IIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-J2-8194-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-MP-A4SW-01": {
+      "stage": "Stage IIB",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-NJ-A4YF-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-NJ-A55O-01": {
+      "stage": "Stage IIA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-NJ-A55R-01": {
+      "stage": "Stage IA",
+      "histology": "Lung Adenocarcinoma"
+    },
+    "TCGA-BF-A1PU-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-BF-A1PZ-01": {
+      "stage": "Stage IIB",
+      "histology": ""
+    },
+    "TCGA-BF-A1Q0-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-BF-A3DJ-01": {
+      "stage": "Stage IIIB",
+      "histology": ""
+    },
+    "TCGA-BF-A5ER-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-BF-AAP8-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-D3-A1Q4-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-D3-A1Q6-06": {
+      "stage": "Stage III",
+      "histology": ""
+    },
+    "TCGA-D3-A1Q7-06": {
+      "stage": "Stage IB",
+      "histology": ""
+    },
+    "TCGA-D3-A2JD-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-D3-A2JF-06": {
+      "stage": "Stage IA",
+      "histology": ""
+    },
+    "TCGA-D3-A3MR-06": {
+      "stage": "Stage III",
+      "histology": ""
+    },
+    "TCGA-D3-A51E-06": {
+      "stage": "I/II NOS",
+      "histology": ""
+    },
+    "TCGA-D3-A51T-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-D3-A5GO-06": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-D3-A5GS-06": {
+      "stage": "Stage IV",
+      "histology": ""
+    },
+    "TCGA-D3-A8GK-06": {
+      "stage": "Stage IIA",
+      "histology": ""
+    },
+    "TCGA-D3-A8GR-06": {
+      "stage": "Stage 0",
+      "histology": ""
+    },
+    "TCGA-D9-A1JW-06": {
+      "stage": "",
+      "histology": ""
+    },
+    "TCGA-D9-A4Z6-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-D9-A6EC-06": {
+      "stage": "Stage IIIA",
+      "histology": ""
+    },
+    "TCGA-DA-A1IB-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-EB-A3XD-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-EB-A42Z-01": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-EB-A44N-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-EB-A4P0-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-EB-A5FP-01": {
+      "stage": "Stage IV",
+      "histology": ""
+    },
+    "TCGA-EB-A5UM-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-EB-A5VU-01": {
+      "stage": "Stage IIIB",
+      "histology": ""
+    },
+    "TCGA-EB-A6L9-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-EB-A97M-01": {
+      "stage": "Stage IIC",
+      "histology": ""
+    },
+    "TCGA-EE-A20H-06": {
+      "stage": "Stage I",
+      "histology": ""
+    },
+    "TCGA-EE-A29H-06": {
+      "stage": "Stage IA",
+      "histology": ""
+    },
+    "TCGA-EE-A2GB-06": {
+      "stage": "Stage IIIB",
+      "histology": ""
+    },
+    "TCGA-EE-A2GR-06": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-EE-A2M5-06": {
+      "stage": "Stage I",
+      "histology": ""
+    },
+    "TCGA-EE-A2M7-06": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-EE-A2MG-06": {
+      "stage": "Stage I",
+      "histology": ""
+    },
+    "TCGA-EE-A2MI-06": {
+      "stage": "Stage IIB",
+      "histology": ""
+    },
+    "TCGA-EE-A2MJ-06": {
+      "stage": "Stage III",
+      "histology": ""
+    },
+    "TCGA-EE-A2MP-06": {
+      "stage": "Stage I",
+      "histology": ""
+    },
+    "TCGA-EE-A2MS-06": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-EE-A3AB-06": {
+      "stage": "Stage III",
+      "histology": ""
+    },
+    "TCGA-EE-A3AH-06": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-EE-A3JB-06": {
+      "stage": "Stage III",
+      "histology": ""
+    },
+    "TCGA-EE-A3JE-06": {
+      "stage": "Stage IIIB",
+      "histology": ""
+    },
+    "TCGA-EE-A3JI-06": {
+      "stage": "Stage I",
+      "histology": ""
+    },
+    "TCGA-ER-A195-06": {
+      "stage": "",
+      "histology": ""
+    },
+    "TCGA-ER-A19D-06": {
+      "stage": "Stage IB",
+      "histology": ""
+    },
+    "TCGA-ER-A2NE-06": {
+      "stage": "Stage 0",
+      "histology": ""
+    },
+    "TCGA-ER-A3ET-06": {
+      "stage": "Stage IIIA",
+      "histology": ""
+    },
+    "TCGA-FR-A44A-06": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-FR-A7U8-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-FR-A8YC-06": {
+      "stage": "Stage IIB",
+      "histology": ""
+    },
+    "TCGA-FS-A1YW-06": {
+      "stage": "Stage IB",
+      "histology": ""
+    },
+    "TCGA-FS-A1Z7-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-FS-A4F4-06": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-FS-A4F9-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-FS-A4FD-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-GN-A262-06": {
+      "stage": "",
+      "histology": ""
+    },
+    "TCGA-GN-A4U3-06": {
+      "stage": "Stage III",
+      "histology": ""
+    },
+    "TCGA-GN-A9SD-06": {
+      "stage": "Stage IA",
+      "histology": ""
+    },
+    "TCGA-HR-A5NC-01": {
+      "stage": "",
+      "histology": ""
+    },
+    "TCGA-LH-A9QB-06": {
+      "stage": "",
+      "histology": ""
+    },
+    "TCGA-QB-AA9O-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-RP-A693-06": {
+      "stage": "Stage IV",
+      "histology": ""
+    },
+    "TCGA-WE-A8ZR-06": {
+      "stage": "Stage IIIC",
+      "histology": ""
+    },
+    "TCGA-WE-A8ZX-06": {
+      "stage": "Stage IIIB",
+      "histology": ""
+    },
+    "TCGA-XV-A9VZ-01": {
+      "stage": "Stage II",
+      "histology": ""
+    },
+    "TCGA-XV-A9W2-01": {
+      "stage": "Stage I",
+      "histology": ""
+    },
+    "TCGA-Z2-AA3V-06": {
+      "stage": "Stage IA",
+      "histology": ""
+    }
+  }
+}
