@@ -4,10 +4,14 @@ Merges CCLE (DepMap) and TCGA (Xena) expression matrices onto a shared HUGO-symb
 gene space so that both domains can be fed through the dual-tower encoders on Day 6+.
 """
 
+import json
+import pickle
 import re
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 from pctrans.data.ccle_client import (
     EXPRESSION_FILENAME as CCLE_EXPRESSION_FILENAME,
@@ -124,14 +128,69 @@ class FeatureSynchroniser:
 
 
 class DataSplitter:
+    """Lineage-stratified train/val/test splits + per-gene z-score scalers.
+
+    The split is stratified by lineage *within each domain separately* so every
+    split preserves the LUAD/BRCA/SKCM proportions of both CCLE and TCGA. The
+    scaler is fit on the pooled CCLE_train + TCGA_train expression only, then
+    applied to val/test — this is the data-leakage boundary for Day 5.
+    """
+
     def stratified_split(self, ccle_df, tcga_df, val_frac=0.15, test_frac=0.15, seed=42):
-        raise NotImplementedError
+        """Return `{"ccle": {"train"/"val"/"test": [ids]}, "tcga": {...}}`.
 
-    def fit_scalers(self, ccle_train_expr, tcga_train_expr):
-        raise NotImplementedError
+        IDs are the DataFrame index values. Each domain is split independently
+        but with the same seed; within a domain each lineage is shuffled and
+        partitioned so the fractions hold per lineage.
+        """
+        return {
+            "ccle": self._split_one(ccle_df, val_frac, test_frac, seed),
+            "tcga": self._split_one(tcga_df, val_frac, test_frac, seed),
+        }
 
-    def apply_scalers(self, expr_df, scaler):
-        raise NotImplementedError
+    def _split_one(self, df, val_frac, test_frac, seed):
+        rng = np.random.default_rng(seed)
+        train, val, test = [], [], []
+        # groupby sorts lineage keys → deterministic iteration order.
+        for _, group in df.groupby("lineage", sort=True):
+            ids = rng.permutation(group.index.to_numpy())
+            n = len(ids)
+            n_test = int(round(n * test_frac))
+            n_val = int(round(n * val_frac))
+            test.extend(ids[:n_test].tolist())
+            val.extend(ids[n_test : n_test + n_val].tolist())
+            train.extend(ids[n_test + n_val :].tolist())
+        return {"train": sorted(train), "val": sorted(val), "test": sorted(test)}
 
-    def save_splits(self, splits, scalers, out_dir):
-        raise NotImplementedError
+    def fit_scalers(self, ccle_train_expr, tcga_train_expr, lineage_col="lineage"):
+        """Fit one `StandardScaler` (per-gene z-score) on pooled train expression.
+
+        Returns `{"scaler": StandardScaler, "feature_cols": [...]}`. The feature
+        column order is captured so `apply_scalers` can realign any frame before
+        transforming.
+        """
+        feature_cols = [c for c in ccle_train_expr.columns if c != lineage_col]
+        pooled = pd.concat(
+            [ccle_train_expr[feature_cols], tcga_train_expr[feature_cols]], axis=0
+        )
+        scaler = StandardScaler().fit(pooled.to_numpy(dtype=np.float64))
+        return {"scaler": scaler, "feature_cols": feature_cols}
+
+    def apply_scalers(self, expr_df, scalers, lineage_col="lineage"):
+        """Z-score `expr_df`'s gene columns with a fitted scaler, keeping lineage."""
+        scaler = scalers["scaler"]
+        feature_cols = scalers["feature_cols"]
+        scaled = scaler.transform(expr_df[feature_cols].to_numpy(dtype=np.float64))
+        out = pd.DataFrame(scaled, index=expr_df.index, columns=feature_cols)
+        if lineage_col in expr_df.columns:
+            out[lineage_col] = expr_df[lineage_col].to_numpy()
+        return out
+
+    def save_splits(self, splits, scalers, out_dir) -> None:
+        """Persist `splits.json` (sample IDs by domain/split) and `scalers.pkl`."""
+        out_dir = Path(out_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        with open(out_dir / "splits.json", "w", encoding="utf-8") as f:
+            json.dump(splits, f, indent=2)
+        with open(out_dir / "scalers.pkl", "wb") as f:
+            pickle.dump(scalers, f)
