@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from pctrans.data.ccle_client import filter_lineages
+from pctrans.data.preprocessor import FeatureSynchroniser
 from pctrans.data.tcga_client import filter_tcga_lineages
 
 
@@ -63,3 +64,42 @@ def test_tcga_phenotype_has_target_lineages():
     pheno = pd.read_csv(path, sep="\t")
     filtered = filter_tcga_lineages(pheno, ["LUAD", "BRCA", "SKCM"])
     assert filtered.sum() > 0
+
+
+def test_find_common_genes_sorted():
+    fs = FeatureSynchroniser()
+    common = fs.find_common_genes(["B", "A", "C"], ["C", "B", "D"])
+    assert common == ["B", "C"]
+
+
+def _common_genes(fs, tiny_ccle, tiny_tcga):
+    ccle_genes = [c for c in tiny_ccle.columns if c != "lineage"]
+    tcga_genes = [c for c in tiny_tcga.columns if c != "lineage"]
+    return fs.find_common_genes(ccle_genes, tcga_genes)
+
+
+def test_hvg_selection_count(tiny_ccle, tiny_tcga):
+    fs = FeatureSynchroniser()
+    common_genes = _common_genes(fs, tiny_ccle, tiny_tcga)
+    hvgs = fs.select_hvgs(tiny_ccle, tiny_tcga, common_genes, n_hvgs=10)
+    assert len(hvgs) == 10
+
+
+def test_hvg_selection_deterministic(tiny_ccle, tiny_tcga):
+    # HVG variance is computed on ALL samples (no split yet) — this is correct,
+    # since the split only needs to happen before fitting scalers (Day 5).
+    fs = FeatureSynchroniser()
+    common_genes = _common_genes(fs, tiny_ccle, tiny_tcga)
+    hvgs_1 = fs.select_hvgs(tiny_ccle, tiny_tcga, common_genes, n_hvgs=10)
+    hvgs_2 = fs.select_hvgs(tiny_ccle, tiny_tcga, common_genes, n_hvgs=10)
+    assert hvgs_1 == hvgs_2
+
+
+def test_hvg_tie_break_is_alphabetical():
+    # GENEA and GENEB have identical variance in both domains, so mean_rank ties;
+    # the deterministic tie-break must prefer the alphabetically-first symbol.
+    ccle = pd.DataFrame({"GENEB": [1.0, 2.0, 3.0], "GENEA": [1.0, 2.0, 3.0]})
+    tcga = pd.DataFrame({"GENEB": [4.0, 5.0, 6.0], "GENEA": [4.0, 5.0, 6.0]})
+    fs = FeatureSynchroniser()
+    hvgs = fs.select_hvgs(ccle, tcga, ["GENEA", "GENEB"], n_hvgs=1)
+    assert hvgs == ["GENEA"]
