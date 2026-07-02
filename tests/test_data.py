@@ -4,11 +4,20 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pctrans.data.ccle_client import filter_lineages
+from pctrans.data.ccle_client import (
+    METADATA_FILENAME as CCLE_METADATA_FILENAME,
+)
+from pctrans.data.ccle_client import CCLEClient, filter_lineages
 from pctrans.data.dataset import LINEAGE_TO_IDX, CCLEDataset, TCGADataset
 from pctrans.data.preprocessor import DataSplitter, FeatureSynchroniser
 from pctrans.data.sampler import StratifiedContrastiveBatchSampler
-from pctrans.data.tcga_client import filter_tcga_lineages
+from pctrans.data.tcga_client import (
+    EXPRESSION_FILENAME as TCGA_EXPRESSION_FILENAME,
+)
+from pctrans.data.tcga_client import (
+    PHENOTYPE_FILENAME as TCGA_PHENOTYPE_FILENAME,
+)
+from pctrans.data.tcga_client import TCGAClient, filter_tcga_lineages
 
 
 def test_tiny_ccle_shape(tiny_ccle):
@@ -245,3 +254,49 @@ def test_sampler_reshuffles_between_epochs(tiny_ccle, tiny_tcga):
     epoch0 = [batch["tcga_indices"] for batch in sampler]
     epoch1 = [batch["tcga_indices"] for batch in sampler]
     assert epoch0 != epoch1  # different shuffle each epoch
+
+
+# --- Download-client idempotency (skip re-download when the file already exists) ---
+
+
+def test_ccle_download_idempotent_when_present(tmp_path):
+    # An existing file short-circuits the download: the path is returned untouched
+    # and no network call is made (force=False).
+    dest = tmp_path / CCLE_METADATA_FILENAME
+    dest.write_text("ModelID,OncotreePrimaryDisease\nACH-1,Melanoma\n", encoding="utf-8")
+    before = dest.read_bytes()
+    returned = CCLEClient().download_metadata(tmp_path)
+    assert Path(returned) == dest
+    assert dest.read_bytes() == before
+
+
+def test_tcga_download_expression_idempotent_when_present(tmp_path):
+    dest = tmp_path / TCGA_EXPRESSION_FILENAME
+    dest.write_text("gene\tTCGA-1\nEGFR\t3.14\n", encoding="utf-8")
+    returned = TCGAClient().download_expression(tmp_path)
+    assert Path(returned) == dest
+
+
+def test_tcga_download_phenotype_idempotent_when_present(tmp_path):
+    dest = tmp_path / TCGA_PHENOTYPE_FILENAME
+    dest.write_text("sample\tcancer type abbreviation\nTCGA-1\tLUAD\n", encoding="utf-8")
+    returned = TCGAClient().download_phenotype(tmp_path)
+    assert Path(returned) == dest
+
+
+# --- FeatureSynchroniser.save_filtered ---
+
+
+def test_save_filtered_writes_parquet_and_gene_list(tiny_ccle, tiny_tcga, tmp_path):
+    fs = FeatureSynchroniser()
+    common = _common_genes(fs, tiny_ccle, tiny_tcga)
+    hvgs = fs.select_hvgs(tiny_ccle, tiny_tcga, common, n_hvgs=5)
+
+    fs.save_filtered(tiny_ccle, tiny_tcga, hvgs, tmp_path)
+
+    assert (tmp_path / "ccle_2k.parquet").exists()
+    assert (tmp_path / "tcga_2k.parquet").exists()
+    gene_list = (tmp_path / "gene_list.txt").read_text(encoding="utf-8").split()
+    assert gene_list == hvgs
+    loaded = pd.read_parquet(tmp_path / "ccle_2k.parquet")
+    assert list(loaded.columns) == [*hvgs, "lineage"]
