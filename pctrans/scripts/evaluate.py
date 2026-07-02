@@ -26,6 +26,7 @@ from pctrans.evaluation.silhouette import (
     cross_domain_silhouette,
     silhouette_contributions,
 )
+from pctrans.evaluation.stats import bootstrap_ci, bootstrap_metric_ci, wilson_ci
 from pctrans.evaluation.tfs import per_cell_line_tfs, translational_fidelity_score
 from pctrans.models.dual_tower import DualTowerModel
 from pctrans.models.encoders import CCLEEncoder, TCGAEncoder
@@ -133,6 +134,16 @@ def main(
     ccle_sil = sil_samples[:n_ccle]
     ccle_tfs = per_cell_line_tfs(knn["match_fraction"], ccle_sil)
 
+    # Day 15: attach intervals to every point metric. Wilson is the analytic
+    # binomial interval for the retrieval proportion (correct for the ~38-anchor
+    # n); the bootstrap intervals resample anchors (kNN) / pooled samples
+    # (silhouette) with replacement and make no distributional assumption.
+    n_anchors = n_ccle
+    successes = int(round(overall * n_anchors))
+    knn_wilson = wilson_ci(successes, n_anchors)
+    knn_boot = bootstrap_metric_ci(knn["match_fraction"])
+    sil_boot = bootstrap_ci(sil_samples, np.mean)
+
     per_cell_line = [
         {
             "id": str(cid),
@@ -156,7 +167,16 @@ def main(
     typer.echo(bar)
     typer.echo("           GATE 1 EVALUATION REPORT")
     typer.echo(bar)
-    typer.echo(f"Overall kNN@{knn['k']} Accuracy:  {overall * 100:5.1f}%   (threshold: 70%)")
+    typer.echo(
+        f"Overall kNN@{knn['k']} Accuracy:  {overall * 100:5.1f}%   (threshold: 70%)"
+    )
+    typer.echo(
+        f"  Wilson 95% CI:   {knn_wilson[0] * 100:5.1f}-{knn_wilson[1] * 100:5.1f}%  "
+        f"(n={n_anchors})"
+    )
+    typer.echo(
+        f"  Bootstrap 95% CI: {knn_boot['ci_low'] * 100:5.1f}-{knn_boot['ci_high'] * 100:5.1f}%"
+    )
     typer.echo("Per-lineage kNN@{}:".format(knn["k"]))
     for lineage in knn["confusion_labels"]:
         val = knn["per_lineage"].get(lineage)
@@ -165,7 +185,10 @@ def main(
     typer.echo("kNN@k table:  " + "  ".join(
         f"k={kk}:{acc * 100:.1f}%" for kk, acc in sorted(knn["k_table"].items())
     ))
-    typer.echo(f"Silhouette Score:  {silhouette:+.2f}   (> 0 = good alignment)")
+    typer.echo(
+        f"Silhouette Score:  {silhouette:+.2f}   (> 0 = good alignment)  "
+        f"[boot 95% CI {sil_boot['ci_low']:+.2f}, {sil_boot['ci_high']:+.2f}]"
+    )
     typer.echo(f"TFS (composite):   {tfs_overall:.2f}    (> 0.6 = deploy)")
     typer.echo(f"Random baseline:   {RANDOM_BASELINE * 100:.1f}%")
     typer.echo(f"PCA+kNN baseline:  {pca_baseline * 100:.1f}%")
@@ -181,6 +204,9 @@ def main(
         "test_sizes": {"ccle": len(ccle_test), "tcga": len(tcga_test)},
         "k": knn["k"],
         "overall_knn_accuracy": overall,
+        "knn_wilson_ci": {"low": knn_wilson[0], "high": knn_wilson[1], "n": n_anchors},
+        "knn_bootstrap_ci": {"low": knn_boot["ci_low"], "high": knn_boot["ci_high"]},
+        "silhouette_bootstrap_ci": {"low": sil_boot["ci_low"], "high": sil_boot["ci_high"]},
         "per_lineage_knn": knn["per_lineage"],
         "knn_k_table": knn["k_table"],
         "confusion_matrix": knn["confusion_matrix"],

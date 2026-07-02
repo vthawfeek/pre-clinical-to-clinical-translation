@@ -34,7 +34,7 @@ the Gate 0/1 (and, once Day 24 lands, Gate 2) evaluation decision.
 
 ## Phase 2 status (Days 15–25 — PLAN-phase2.md)
 
-- Day 15: PENDING — bootstrap + Wilson CIs, multi-seed reproducibility harness
+- Day 15: COMPLETE — evaluation/stats.py (Wilson + bootstrap CIs, seed aggregation), pctrans-multiseed harness, pctrans-evaluate now prints/stores CIs; single-split kNN@5 100% (Wilson 90.8–100%, n=38); 10-seed (42–51) kNN@5 0.950±0.034 CI [0.932,0.971] (min 0.895), TFS 0.910±0.038 — stable, not a lucky split; test_stats.py (8 tests), 83 tests pass
 - Day 16: PENDING — train-only HVG selection, leakage-delta analysis
 - Day 17: PENDING — Harmony/ComBat/Scanorama baselines, supervised cross-domain ceiling
 - Day 18: PENDING — config-driven lineages, 15-lineage data + training run

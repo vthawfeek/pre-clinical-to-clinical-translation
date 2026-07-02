@@ -8,6 +8,19 @@
   },
   "k": 5,
   "overall_knn_accuracy": 1.0,
+  "knn_wilson_ci": {
+    "low": 0.908190131774416,
+    "high": 0.9999999999999999,
+    "n": 38
+  },
+  "knn_bootstrap_ci": {
+    "low": 1.0,
+    "high": 1.0
+  },
+  "silhouette_bootstrap_ci": {
+    "low": 0.5520552689757262,
+    "high": 0.5801304605943238
+  },
   "per_lineage_knn": {
     "LUAD": 1.0,
     "BRCA": 1.0,
