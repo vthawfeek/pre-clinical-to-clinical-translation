@@ -41,6 +41,7 @@ pctrans-preprocess = "pctrans.scripts.preprocess:app"
 pctrans-train      = "pctrans.scripts.train:app"
 pctrans-evaluate   = "pctrans.scripts.evaluate:app"
 pctrans-visualize  = "pctrans.scripts.visualize:app"
+pctrans-precompute = "pctrans.scripts.precompute:app"
 pctrans-query      = "pctrans.scripts.query:app"
 
 [tool.hatch.build.targets.wheel]

@@ -26,7 +26,8 @@ evaluation decision.
 - Day 9: COMPLETE — 02_training_analysis notebook (5 panels), trainer grad-norm history + on_epoch_end hook; best val kNN@5 0.9737 (epoch 2), τ stable 0.070→0.073, towers balanced (no 10× asymmetry), SKCM hardest (0.9375), domain centroid cosine 0.251 (no collapse); embed_dim ablation 32/64/128 all ≥0.89, embed_dim confirmed 64
 - Day 10: COMPLETE — evaluation modules (knn/silhouette/tfs), pctrans-evaluate CLI, PCA baseline; Gate 1 PASS → DEPLOY (test kNN@5 100%, kNN@1 97.4%, silhouette +0.57, TFS 0.89; PCA+kNN baseline 65.8%, random 33.3%; per-cell-line TFS ranked, lowest ACH-000264 LUAD 0.662)
 - Day 11: COMPLETE — viz.py (umap_projection, lineage/domain scatter, TFS ranking bar, static + before/after renderers), pctrans-visualize CLI, embeddings_test.npz; UMAP + before/after + TFS figures rendered; outlier ACH-000264=Calu-6 (anaplastic NSCLC, TFS 0.662), bottom BRCA all TNBC/basal; tightness BRCA +0.861 > SKCM +0.802 > LUAD +0.787; 03_evaluation notebook (5 sections)
-- Day 12-14: PENDING
+- Day 12: COMPLETE — Streamlit app (app/streamlit_app.py: sidebar dropdown grouped by lineage, live UMAP with star-highlighted cell line + 5 nearest-patient hexagons, TFS gauge, neighbours table with tumour stage/histology), pctrans-precompute CLI → ccle_embeddings.npz (259 cell lines × 64-d) + app_meta.json (259 names, 339 TCGA annotations, deploy-safe); app runs on held-out test embeddings, AppTest render clean; lowest test TFS CALU6/ACH-000264 0.662 (no <0.4 case exists); blog-02 + LinkedIn-02 + X-thread-02 drafts
+- Day 13-14: PENDING
 
 ## Project
 
