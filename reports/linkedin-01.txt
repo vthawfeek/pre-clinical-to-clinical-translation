@@ -1,0 +1,18 @@
+The Phase II oncology failure rate is 67%. Most drugs work beautifully in cell lines.
+They fail in patients.
+
+I spent this week building a neural network that tries to bridge that gap:
+training a dual-tower InfoNCE contrastive model to map CCLE cancer cell lines
+directly into TCGA patient space.
+
+The architecture: two MLP towers sharing no weights, each processing 2,000 highly
+variable genes, pushing representations toward a 64-dimensional shared manifold
+(5.5M parameters total). Week 1 milestone: the full pipeline runs end to end and
+the first training epoch completes clean, finite loss, no blowups.
+
+Week 2 brings the UMAP reveal, do the cell lines actually land near their human
+counterparts, or does petri-dish noise win?
+
+Blog post (with architecture deep-dive): https://github.com/vthawfeek/pre-clinical-to-clinical-translation/blob/main/reports/blog-01-concept.md
+
+#ComputationalBiology #MachineLearning #CancerResearch #TranslationalMedicine
