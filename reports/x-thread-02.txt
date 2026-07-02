@@ -1,0 +1,47 @@
+1/ I spent 2 weeks building a neural network to translate cancer cell lines into
+   human patient space. Here is what the numbers actually say. 🧵
+
+2/ The problem: 85% of cancer drugs that work in cell lines fail in patients.
+   Root cause: a cell line grown in a petri dish is not a human tumour living in an
+   immune system and a blood supply. The gene expression patterns are genuinely
+   different, and that gap is the largest axis of variation in the raw data.
+
+3/ The idea: CLIP-style contrastive learning. Train two encoders, one for CCLE cell
+   lines and one for TCGA patients, to share a latent space where the same cancer
+   lineage clusters together regardless of which domain it came from.
+
+4/ The data: ~260 CCLE cell lines and ~2,300 TCGA patients across 3 lineages
+   (LUAD, BRCA, SKCM). Top 2,000 highly variable genes. All freely available,
+   zero institutional permissions needed.
+
+5/ The key math: a SupCon-InfoNCE loss. For each cell line anchor, ALL same-lineage
+   patients in the batch are positives, cross-lineage patients are negatives.
+   The temperature is learnable, and it stayed near 0.07 through training. It did not
+   need to sharpen further.
+
+6/ The result: [attach umap_before_after.png]
+   kNN@5 retrieval accuracy on the held-out test set = 100%
+   (random = 33.3%, PCA+kNN baseline = 65.8%).
+   Honest caveat: the test set is small, 38 cell lines, so read this as a strong
+   signal, not a benchmark. kNN@1 is 97.4%, one miss.
+
+7/ The honesty part: SKCM has the highest mean fidelity (TFS 0.86). Melanoma carries
+   a loud melanocyte identity program that reads the same in a flask or a patient.
+   The lowest-fidelity ranks are dominated by triple-negative breast lines.
+   Hypothesis: BRCA is really 4 molecular subtypes collapsed into one lineage label.
+
+8/ Every cell line now has a Translational Fidelity Score. The three lowest:
+   Calu-6 (0.662, an anaplastic lung line that lost its differentiation markers),
+   HCC38 (0.799) and HCC1937 (0.799), both triple-negative breast.
+   Even the least reliable clear 0.66, so these are the weak stand-ins in a strong
+   field, not failures. The score tells you which to trust less.
+
+9/ Live demo: select a CCLE cell line, watch it land in the UMAP of human patients,
+   read its TFS and its 5 nearest patients with tumour stage.
+   👉 https://pctrans.streamlit.app
+
+10/ Full code, docs, evaluation pipeline:
+    👉 https://github.com/vthawfeek/pre-clinical-to-clinical-translation
+
+    Next: integrate drug response data (PRISM, GDSC) to test whether a high TFS
+    predicts that a cell line's drug response transfers to its matched patients.

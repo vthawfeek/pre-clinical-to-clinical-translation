@@ -1,0 +1,31 @@
+Two weeks ago: cancer cell lines and human tumours formed completely separate clouds
+in gene expression space.
+
+Today: [attach umap_before_after.png]
+
+Left: raw PCA. CCLE cell lines and TCGA patients sit in two separate clouds. The
+biggest axis of variation is not lung vs breast vs skin, it is dish vs body. That is
+the clinical translation problem in mathematical form.
+
+Right: the trained dual-tower model's UMAP. The two clouds are gone. LUAD cell lines
+cluster with LUAD patients. BRCA with BRCA. SKCM with SKCM. Each cell line lands
+inside its own lineage's patient cloud.
+
+kNN@5 retrieval accuracy on the held-out test set: 100% (random baseline 33.3%,
+PCA+kNN baseline 65.8%, Harmony reference ~63%). Honest caveat: the test set is small,
+38 cell lines against 339 patients, so read 100% as a strong signal, not a benchmark.
+kNN@1 is 97.4%, a single miss.
+
+That miss is the interesting part. It is Calu-6, an anaplastic lung line that has lost
+its differentiation markers, so the model correctly flags it as a weak stand-in for a
+typical lung adenocarcinoma patient. Every cell line now carries a Translational
+Fidelity Score, and the four lowest breast lines are all triple-negative, which is the
+model telling the truth about a label problem: BRCA is really four molecular subtypes
+collapsed into one bucket.
+
+Live demo, pick any test cell line and watch it land in patient space:
+https://pctrans.streamlit.app
+
+Full code and evaluation pipeline: https://github.com/vthawfeek/pre-clinical-to-clinical-translation
+
+#CancerGenomics #ContrastiveLearning #CCLE #TCGA #Bioinformatics #OpenScience
