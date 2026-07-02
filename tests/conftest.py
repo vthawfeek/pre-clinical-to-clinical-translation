@@ -29,7 +29,12 @@ def tiny_tcga():
 
 @pytest.fixture
 def tiny_model():
-    return {"input_dim": 5, "hidden_dims": [16, 8], "embed_dim": 8, "dropout": 0.1}
+    from pctrans.models.dual_tower import DualTowerModel
+    from pctrans.models.encoders import CCLEEncoder, TCGAEncoder
+
+    ccle = CCLEEncoder(input_dim=2000, hidden_dims=(1024, 512, 256, 128), embed_dim=64)
+    tcga = TCGAEncoder(input_dim=2000, hidden_dims=(1024, 512, 256, 128), embed_dim=64)
+    return DualTowerModel(ccle, tcga).eval()
 
 
 @pytest.fixture
