@@ -101,13 +101,25 @@ class ContrastiveTrainer:
         labels = torch.as_tensor(dataset.labels[indices])
         return features, labels
 
+    @staticmethod
+    def _grad_norm(params):
+        """L2 norm of the concatenated gradients of ``params`` (0.0 if none set)."""
+        sq_sum = 0.0
+        for p in params:
+            if p.grad is not None:
+                sq_sum += float(p.grad.detach().norm(2).item()) ** 2
+        return sq_sum**0.5
+
     def _train_one_epoch(self, optimizer):
         self.model.train()
         ccle_ds = self.train_sampler.ccle_dataset
         tcga_ds = self.train_sampler.tcga_dataset
         params = list(self.model.parameters()) + list(self.loss_fn.parameters())
+        ccle_params = list(self.model.ccle_encoder.parameters())
+        tcga_params = list(self.model.tcga_encoder.parameters())
 
         total_loss, n_batches = 0.0, 0
+        ccle_grad_sum, tcga_grad_sum = 0.0, 0.0
         for batch in self.train_sampler:
             x_ccle, y_ccle = self._batch_tensors(ccle_ds, batch["ccle_indices"])
             x_tcga, y_tcga = self._batch_tensors(tcga_ds, batch["tcga_indices"])
@@ -116,13 +128,22 @@ class ContrastiveTrainer:
             z_ccle, z_tcga = self.model(x_ccle, x_tcga)
             loss = self.loss_fn(z_ccle, z_tcga, y_ccle, y_tcga)
             loss.backward()
+            # Per-encoder gradient norm, measured pre-clip, for the Day 9
+            # tower-asymmetry diagnostic (Panel 4).
+            ccle_grad_sum += self._grad_norm(ccle_params)
+            tcga_grad_sum += self._grad_norm(tcga_params)
             torch.nn.utils.clip_grad_norm_(params, self.grad_clip_norm)
             optimizer.step()
 
             total_loss += float(loss.item())
             n_batches += 1
 
-        return total_loss / max(1, n_batches)
+        denom = max(1, n_batches)
+        return {
+            "train_loss": total_loss / denom,
+            "grad_norm_ccle": ccle_grad_sum / denom,
+            "grad_norm_tcga": tcga_grad_sum / denom,
+        }
 
     # -- validation loss (single pooled SupCon batch) --------------------------
 
@@ -164,7 +185,14 @@ class ContrastiveTrainer:
 
     # -- main loop --------------------------------------------------------------
 
-    def train(self, n_epochs=None):
+    def train(self, n_epochs=None, on_epoch_end=None):
+        """Fit the model.
+
+        ``on_epoch_end``, if given, is called as ``on_epoch_end(epoch, model,
+        record)`` after each epoch's validation. The model is in eval mode at
+        that point; the hook is used by the Day 9 analysis notebook to snapshot
+        validation embeddings without duplicating the training loop.
+        """
         n_epochs = int(n_epochs or self.config.get("n_epochs", 30))
         optimizer = torch.optim.Adam(
             list(self.model.parameters()) + list(self.loss_fn.parameters()),
@@ -188,7 +216,8 @@ class ContrastiveTrainer:
             )
 
             for epoch in range(n_epochs):
-                train_loss = self._train_one_epoch(optimizer)
+                epoch_stats = self._train_one_epoch(optimizer)
+                train_loss = epoch_stats["train_loss"]
                 scheduler.step()
 
                 val_metrics = self.knn_callback(
@@ -206,6 +235,8 @@ class ContrastiveTrainer:
                         "val_knn_accuracy": val_knn,
                         "temperature": tau,
                         "lr": lr,
+                        "grad_norm_ccle": epoch_stats["grad_norm_ccle"],
+                        "grad_norm_tcga": epoch_stats["grad_norm_tcga"],
                     },
                     step=epoch,
                 )
@@ -217,9 +248,14 @@ class ContrastiveTrainer:
                     "val_knn_accuracy": val_knn,
                     "temperature": tau,
                     "lr": lr,
+                    "grad_norm_ccle": epoch_stats["grad_norm_ccle"],
+                    "grad_norm_tcga": epoch_stats["grad_norm_tcga"],
                     "per_lineage": val_metrics["per_lineage"],
                 }
                 history.append(record)
+
+                if on_epoch_end is not None:
+                    on_epoch_end(epoch, self.model, record)
 
                 if val_knn > best_knn:
                     best_knn, best_epoch, epochs_since_improve = val_knn, epoch, 0

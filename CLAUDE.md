@@ -23,7 +23,8 @@ evaluation decision.
 - Day 6: COMPLETE — CCLEEncoder/TCGAEncoder (shared MLP template, separate weights), DualTowerModel (L2-normalised), SupConInfoNCELoss (learnable log(1/τ)); ~5.5M params
 - Day 7: COMPLETE — ContrastiveTrainer (Adam, cosine+warmup LR, grad-clip, MLflow, checkpoint+early-stop), KNNValidationCallback, pctrans-train CLI, blog-01 draft; Gate 0 PASS (epoch-1 loss finite, val kNN@5 0.816, τ 0.070)
 - Day 8: COMPLETE — full training run (early-stopped epoch 7/30, patience 5), best_model.pt saved (epoch 2, val kNN@5 0.9474), MLflow experiment pctrans-v1, hyperparameter mini-sweep A/B/C (all >0.92, default retained); τ stable 0.070→0.074, no collapse
-- Day 9-14: PENDING
+- Day 9: COMPLETE — 02_training_analysis notebook (5 panels), trainer grad-norm history + on_epoch_end hook; best val kNN@5 0.9737 (epoch 2), τ stable 0.070→0.073, towers balanced (no 10× asymmetry), SKCM hardest (0.9375), domain centroid cosine 0.251 (no collapse); embed_dim ablation 32/64/128 all ≥0.89, embed_dim confirmed 64
+- Day 10-14: PENDING
 
 ## Project
 

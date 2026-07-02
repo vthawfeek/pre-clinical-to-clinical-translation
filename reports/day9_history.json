@@ -1,0 +1,155 @@
+{
+  "main_run": {
+    "n_epochs_ran": 7,
+    "best_epoch": 2,
+    "best_val_knn": 0.9736842105263158,
+    "final_epoch": 7,
+    "final_val_knn": 0.9473684210526315,
+    "final_tau": 0.07336536794900894,
+    "init_tau": 0.07016948610544205,
+    "final_per_lineage": {
+      "LUAD": 1.0,
+      "BRCA": 0.9,
+      "SKCM": 0.9375
+    },
+    "best_per_lineage": {
+      "LUAD": 1.0,
+      "BRCA": 1.0,
+      "SKCM": 0.9375
+    }
+  },
+  "grad_norm_final": {
+    "ccle": 0.18490245916749518,
+    "tcga": 0.44130371846493177,
+    "ratio_tcga_over_ccle": 2.3866838789048974
+  },
+  "domain_collapse": {
+    "centroid_cosine_sim": 0.2507387101650238,
+    "threshold": 0.5,
+    "pass": true
+  },
+  "ablation": {
+    "32": {
+      "best_val_knn": 0.9473684210526315,
+      "final_val_knn": 0.9473684210526315,
+      "final_tau": 0.07110588252544403
+    },
+    "64": {
+      "best_val_knn": 0.9736842105263158,
+      "final_val_knn": 0.9736842105263158,
+      "final_tau": 0.07108840346336365
+    },
+    "128": {
+      "best_val_knn": 0.9473684210526315,
+      "final_val_knn": 0.8947368421052632,
+      "final_tau": 0.07111106812953949
+    }
+  },
+  "history": [
+    {
+      "epoch": 0,
+      "train_loss": 7.533346943738984,
+      "val_loss": 8.94013500213623,
+      "val_knn_accuracy": 0.8421052631578947,
+      "temperature": 0.07016948610544205,
+      "lr": 0.00011999999999999999,
+      "grad_norm_ccle": 41.72031728089186,
+      "grad_norm_tcga": 42.04076963457511,
+      "per_lineage": {
+        "LUAD": 0.8333333333333334,
+        "BRCA": 0.7,
+        "SKCM": 0.9375
+      }
+    },
+    {
+      "epoch": 1,
+      "train_loss": 5.745163033648235,
+      "val_loss": 8.044899940490723,
+      "val_knn_accuracy": 0.9736842105263158,
+      "temperature": 0.07050148397684097,
+      "lr": 0.00017999999999999998,
+      "grad_norm_ccle": 25.847778174270626,
+      "grad_norm_tcga": 21.38527108120844,
+      "per_lineage": {
+        "LUAD": 1.0,
+        "BRCA": 1.0,
+        "SKCM": 0.9375
+      }
+    },
+    {
+      "epoch": 2,
+      "train_loss": 4.717396561692401,
+      "val_loss": 7.763031959533691,
+      "val_knn_accuracy": 0.9736842105263158,
+      "temperature": 0.07108840346336365,
+      "lr": 0.00023999999999999998,
+      "grad_norm_ccle": 10.682421236081057,
+      "grad_norm_tcga": 7.099394706656465,
+      "per_lineage": {
+        "LUAD": 1.0,
+        "BRCA": 1.0,
+        "SKCM": 0.9375
+      }
+    },
+    {
+      "epoch": 3,
+      "train_loss": 4.316620210321938,
+      "val_loss": 8.57132625579834,
+      "val_knn_accuracy": 0.8947368421052632,
+      "temperature": 0.07196356356143951,
+      "lr": 0.0003,
+      "grad_norm_ccle": 2.8556773050359223,
+      "grad_norm_tcga": 1.7588779390163292,
+      "per_lineage": {
+        "LUAD": 1.0,
+        "BRCA": 0.7,
+        "SKCM": 0.9375
+      }
+    },
+    {
+      "epoch": 4,
+      "train_loss": 4.1980678744432405,
+      "val_loss": 8.78097152709961,
+      "val_knn_accuracy": 0.8947368421052632,
+      "temperature": 0.07273755222558975,
+      "lr": 0.0003,
+      "grad_norm_ccle": 0.5511776807451947,
+      "grad_norm_tcga": 0.7388467644446157,
+      "per_lineage": {
+        "LUAD": 1.0,
+        "BRCA": 0.7,
+        "SKCM": 0.9375
+      }
+    },
+    {
+      "epoch": 5,
+      "train_loss": 4.187895414305896,
+      "val_loss": 7.987061500549316,
+      "val_knn_accuracy": 0.9473684210526315,
+      "temperature": 0.0731012150645256,
+      "lr": 0.0002988172051971717,
+      "grad_norm_ccle": 0.2657885563323259,
+      "grad_norm_tcga": 0.4747161035825313,
+      "per_lineage": {
+        "LUAD": 1.0,
+        "BRCA": 0.9,
+        "SKCM": 0.9375
+      }
+    },
+    {
+      "epoch": 6,
+      "train_loss": 4.190728024738591,
+      "val_loss": 8.121763229370117,
+      "val_knn_accuracy": 0.9473684210526315,
+      "temperature": 0.07336536794900894,
+      "lr": 0.00029528747416929463,
+      "grad_norm_ccle": 0.18490245916749518,
+      "grad_norm_tcga": 0.44130371846493177,
+      "per_lineage": {
+        "LUAD": 1.0,
+        "BRCA": 0.9,
+        "SKCM": 0.9375
+      }
+    }
+  ]
+}
