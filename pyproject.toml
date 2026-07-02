@@ -18,6 +18,7 @@ dependencies = [
     "llvmlite>=0.42",
     "streamlit>=1.34",
     "plotly>=5.20",
+    "matplotlib>=3.8",
     "mlflow>=2.12",
     "typer>=0.12",
     "pyyaml>=6.0",
@@ -39,6 +40,7 @@ pctrans-download   = "pctrans.scripts.download:app"
 pctrans-preprocess = "pctrans.scripts.preprocess:app"
 pctrans-train      = "pctrans.scripts.train:app"
 pctrans-evaluate   = "pctrans.scripts.evaluate:app"
+pctrans-visualize  = "pctrans.scripts.visualize:app"
 pctrans-query      = "pctrans.scripts.query:app"
 
 [tool.hatch.build.targets.wheel]

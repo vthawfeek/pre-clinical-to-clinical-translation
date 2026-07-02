@@ -2414,6 +2414,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "llvmlite" },
+    { name = "matplotlib" },
     { name = "mlflow" },
     { name = "numba" },
     { name = "numpy" },
@@ -2444,6 +2445,7 @@ requires-dist = [
     { name = "harmonypy", marker = "extra == 'dev'", specifier = ">=0.0.9,<2.0" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "llvmlite", specifier = ">=0.42" },
+    { name = "matplotlib", specifier = ">=3.8" },
     { name = "mlflow", specifier = ">=2.12" },
     { name = "numba", specifier = ">=0.59" },
     { name = "numpy", specifier = ">=1.26" },
