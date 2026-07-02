@@ -21,7 +21,8 @@ evaluation decision.
 - Day 4: COMPLETE — FeatureSynchroniser (gene-ID harmonisation, union-rank HVG selection), pctrans-preprocess CLI, EDA notebook
 - Day 5: COMPLETE — DataSplitter (lineage-stratified split, train-only pooled scalers), CCLEDataset/TCGADataset, StratifiedContrastiveBatchSampler, --split CLI
 - Day 6: COMPLETE — CCLEEncoder/TCGAEncoder (shared MLP template, separate weights), DualTowerModel (L2-normalised), SupConInfoNCELoss (learnable log(1/τ)); ~5.5M params
-- Day 7-14: PENDING
+- Day 7: COMPLETE — ContrastiveTrainer (Adam, cosine+warmup LR, grad-clip, MLflow, checkpoint+early-stop), KNNValidationCallback, pctrans-train CLI, blog-01 draft; Gate 0 PASS (epoch-1 loss finite, val kNN@5 0.816, τ 0.070)
+- Day 8-14: PENDING
 
 ## Project
 

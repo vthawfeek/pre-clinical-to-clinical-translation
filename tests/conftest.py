@@ -38,6 +38,47 @@ def tiny_model():
 
 
 @pytest.fixture
+def tiny_ccle_dataset(tiny_ccle):
+    from pctrans.data.dataset import CCLEDataset
+
+    return CCLEDataset(tiny_ccle, lineage_col="lineage")
+
+
+@pytest.fixture
+def tiny_tcga_dataset(tiny_tcga):
+    from pctrans.data.dataset import TCGADataset
+
+    return TCGADataset(tiny_tcga, lineage_col="lineage")
+
+
+@pytest.fixture
+def tiny_sampler(tiny_ccle_dataset, tiny_tcga_dataset):
+    from pctrans.data.sampler import StratifiedContrastiveBatchSampler
+
+    # batch_size=6 -> 1 CCLE + 1 TCGA per lineage across LUAD/BRCA/SKCM.
+    return StratifiedContrastiveBatchSampler(
+        tiny_ccle_dataset, tiny_tcga_dataset, batch_size=6
+    )
+
+
+@pytest.fixture
+def small_model():
+    """A dual-tower model sized to the 50-gene tiny fixtures (not the 2000-gene one).
+
+    The plan's `test_one_training_epoch` snippet names `tiny_model`, but that
+    fixture is 2000-dim to match the Day 6 encoder tests; the tiny datasets have
+    50 genes, so training needs an input-matched model. Small hidden dims keep a
+    forward+backward pass well under a second.
+    """
+    from pctrans.models.dual_tower import DualTowerModel
+    from pctrans.models.encoders import CCLEEncoder, TCGAEncoder
+
+    ccle = CCLEEncoder(input_dim=50, hidden_dims=(16, 8), embed_dim=8, dropout=0.1, dropout_low=0.1)
+    tcga = TCGAEncoder(input_dim=50, hidden_dims=(16, 8), embed_dim=8, dropout=0.1, dropout_low=0.1)
+    return DualTowerModel(ccle, tcga)
+
+
+@pytest.fixture
 def tiny_ccle_meta():
     return pd.DataFrame(
         {
