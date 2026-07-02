@@ -22,7 +22,8 @@ evaluation decision.
 - Day 5: COMPLETE — DataSplitter (lineage-stratified split, train-only pooled scalers), CCLEDataset/TCGADataset, StratifiedContrastiveBatchSampler, --split CLI
 - Day 6: COMPLETE — CCLEEncoder/TCGAEncoder (shared MLP template, separate weights), DualTowerModel (L2-normalised), SupConInfoNCELoss (learnable log(1/τ)); ~5.5M params
 - Day 7: COMPLETE — ContrastiveTrainer (Adam, cosine+warmup LR, grad-clip, MLflow, checkpoint+early-stop), KNNValidationCallback, pctrans-train CLI, blog-01 draft; Gate 0 PASS (epoch-1 loss finite, val kNN@5 0.816, τ 0.070)
-- Day 8-14: PENDING
+- Day 8: COMPLETE — full training run (early-stopped epoch 7/30, patience 5), best_model.pt saved (epoch 2, val kNN@5 0.9474), MLflow experiment pctrans-v1, hyperparameter mini-sweep A/B/C (all >0.92, default retained); τ stable 0.070→0.074, no collapse
+- Day 9-14: PENDING
 
 ## Project
 
