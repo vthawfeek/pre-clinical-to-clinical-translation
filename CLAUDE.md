@@ -36,7 +36,7 @@ the Gate 0/1 (and, once Day 24 lands, Gate 2) evaluation decision.
 
 - Day 15: COMPLETE — evaluation/stats.py (Wilson + bootstrap CIs, seed aggregation), pctrans-multiseed harness, pctrans-evaluate now prints/stores CIs; single-split kNN@5 100% (Wilson 90.8–100%, n=38); 10-seed (42–51) kNN@5 0.950±0.034 CI [0.932,0.971] (min 0.895), TFS 0.910±0.038 — stable, not a lucky split; test_stats.py (8 tests), 83 tests pass
 - Day 16: COMPLETE — train-only HVG selection (`--hvg-on all|train` flag, split-then-select), gene_list_trainhvg.txt + best_model_trainhvg.pt; leakage-delta analysis: gene-list Jaccard 0.9512, test kNN@5 unchanged at 100%, silhouette −0.0036, TFS −0.0009 — leakage confirmed negligible, Phase-1 numbers stand
-- Day 17: PENDING — Harmony/ComBat/Scanorama baselines, supervised cross-domain ceiling
+- Day 17: COMPLETE — pctrans/evaluation/baselines.py (harmony_knn/combat_knn/scanorama_knn/supervised_ceiling), pctrans-baselines CLI → reports/baselines.json; real numbers on test data: PCA 65.8%, Harmony 84.2% (harmonypy, real), ComBat/Scanorama n/a locally (no prebuilt wheels, need C++ toolchain — optional `baselines` extra, None-safe), supervised ceiling 97.1% (CCLE→TCGA logistic regression, no alignment); contrastive still wins at 100% (+15.8pts vs best real baseline, +2.9pts vs the fully-supervised ceiling); CI scoped to `uv sync --extra dev` to keep fragile native deps opt-in
 - Day 18: PENDING — config-driven lineages, 15-lineage data + training run
 - Day 19: PENDING — 15-lineage evaluation, error-structure biology analysis
 - Day 20: PENDING — tumour-purity confounder analysis (stratified + residualised)
@@ -64,7 +64,7 @@ Loss:      SupCon-style multi-positive InfoNCE, learnable log(1/τ) initialised 
 Batch:     B=48 pairs: 16 LUAD + 16 BRCA + 16 SKCM (SupCon: all same-lineage cross-domain = positive)
 Training:  30 epochs, Adam lr=3e-4, cosine LR schedule, Colab T4 (~3 min) or CPU (~12 min)
 Gate:      Day 10 kNN@5 Retrieval Accuracy ≥ 70% → DEPLOY; < 70% → DEBUG PROTOCOL
-Baselines: Random 33.3%, PCA+kNN ~55%, Harmony ~63%, ours target ≥ 70%
+Baselines: Random 33.3%, PCA+kNN 65.8%, Harmony 84.2% (real, Day 17), ours 100% (Wilson CI 90.8–100%)
 ```
 
 ## Tech stack

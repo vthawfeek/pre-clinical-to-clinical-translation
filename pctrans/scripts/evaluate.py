@@ -16,12 +16,12 @@ import pandas as pd
 import torch
 import typer
 import yaml
-from sklearn.decomposition import PCA
 from torch.utils.data import DataLoader
 
 from pctrans.data.dataset import IDX_TO_LINEAGE, CCLEDataset, TCGADataset
 from pctrans.data.preprocessor import DataSplitter
-from pctrans.evaluation.knn import knn_accuracy_from_embeddings, knn_retrieval_accuracy
+from pctrans.evaluation.baselines import RANDOM_BASELINE, pca_knn
+from pctrans.evaluation.knn import knn_retrieval_accuracy
 from pctrans.evaluation.silhouette import (
     cross_domain_silhouette,
     silhouette_contributions,
@@ -33,8 +33,6 @@ from pctrans.models.encoders import CCLEEncoder, TCGAEncoder
 
 app = typer.Typer()
 
-RANDOM_BASELINE = 1.0 / 3.0
-HARMONY_BASELINE = 0.63  # literature reference (harmonypy not a project dependency)
 DEPLOY_THRESHOLD = 0.70
 
 
@@ -63,20 +61,6 @@ def _decision(accuracy):
     if accuracy >= 0.50:
         return "DEBUG", "HARD FAIL (50-60% -> batch-construction fix)"
     return "DEBUG", "ARCHITECTURE FAILURE (<50% -> pivot)"
-
-
-def _pca_knn_baseline(ccle_ds, tcga_ds, n_components=50, k=5):
-    """No-alignment baseline: PCA on pooled raw features, then cross-domain kNN."""
-    x_ccle = ccle_ds.features.numpy()
-    x_tcga = tcga_ds.features.numpy()
-    pooled = np.concatenate([x_ccle, x_tcga], axis=0)
-    n_comp = min(n_components, pooled.shape[0], pooled.shape[1])
-    coords = PCA(n_components=n_comp, random_state=42).fit_transform(pooled)
-    z_ccle, z_tcga = coords[: len(x_ccle)], coords[len(x_ccle):]
-    res = knn_accuracy_from_embeddings(
-        z_ccle, ccle_ds.labels, z_tcga, tcga_ds.labels, k=k
-    )
-    return res["overall_accuracy"]
 
 
 @app.command()
@@ -167,7 +151,7 @@ def main(
     ]
     per_cell_line.sort(key=lambda r: r["tfs"], reverse=True)
 
-    pca_baseline = _pca_knn_baseline(ccle_test, tcga_test, k=k)
+    pca_baseline = pca_knn(ccle_test, tcga_test, k=k)
     decision, band = _decision(overall)
 
     # -- Gate 1 report ---------------------------------------------------------
@@ -201,7 +185,7 @@ def main(
     typer.echo(f"TFS (composite):   {tfs_overall:.2f}    (> 0.6 = deploy)")
     typer.echo(f"Random baseline:   {RANDOM_BASELINE * 100:.1f}%")
     typer.echo(f"PCA+kNN baseline:  {pca_baseline * 100:.1f}%")
-    typer.echo(f"Harmony baseline:  ~{HARMONY_BASELINE * 100:.0f}%  (literature)")
+    typer.echo("Real Harmony/ComBat/Scanorama + supervised ceiling: run pctrans-baselines")
     typer.echo(bar)
     typer.echo(f"DECISION: {decision}   [{band}]")
     typer.echo(bar)
@@ -225,7 +209,6 @@ def main(
         "baselines": {
             "random": RANDOM_BASELINE,
             "pca_knn": pca_baseline,
-            "harmony_reference": HARMONY_BASELINE,
         },
         "decision": decision,
         "decision_band": band,

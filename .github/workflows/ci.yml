@@ -17,7 +17,10 @@ jobs:
         run: uv python install 3.11
 
       - name: Sync dependencies
-        run: uv sync --all-extras
+        # `baselines` (scanorama/inmoose) ships no prebuilt wheels and needs a
+        # C/C++ toolchain to build from source; keep CI on the `dev` extra so
+        # that install stays fast and doesn't depend on a working compiler.
+        run: uv sync --extra dev
 
       - name: Lint
         run: uv run ruff check pctrans/ tests/

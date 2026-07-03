@@ -58,8 +58,7 @@
   "tfs_overall": 0.8915431953026595,
   "baselines": {
     "random": 0.3333333333333333,
-    "pca_knn": 0.6578947368421053,
-    "harmony_reference": 0.63
+    "pca_knn": 0.6578947368421053
   },
   "decision": "DEPLOY",
   "decision_band": "PASS (>=70% -> deploy path, Days 11-14)",

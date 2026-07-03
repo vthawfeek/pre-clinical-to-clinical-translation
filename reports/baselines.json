@@ -1,0 +1,17 @@
+{
+  "random": 0.3333333333333333,
+  "pca_knn": 0.6578947368421053,
+  "harmony_knn": 0.8421052631578947,
+  "combat_knn": null,
+  "scanorama_knn": null,
+  "supervised_ceiling": 0.9705014749262537,
+  "contrastive_knn5": 1.0,
+  "contrastive_wilson_ci": {
+    "low": 0.908190131774416,
+    "high": 0.9999999999999999,
+    "n": 38
+  },
+  "best_real_baseline": 0.8421052631578947,
+  "beats_best_baseline_by": 0.1578947368421053,
+  "matches_supervised_ceiling": false
+}
