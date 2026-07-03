@@ -13,6 +13,7 @@ dependencies = [
     "numpy>=1.26",
     "pyarrow>=15.0",
     "scikit-learn>=1.4",
+    "scipy>=1.11",
     "umap-learn>=0.5",
     "numba>=0.59",
     "llvmlite>=0.42",
@@ -57,6 +58,7 @@ pctrans-query      = "pctrans.scripts.query:app"
 pctrans-confounders = "pctrans.scripts.confounders:app"
 pctrans-permutation-test = "pctrans.scripts.permutation_test:app"
 pctrans-casestudy  = "pctrans.scripts.casestudy:app"
+pctrans-casestudy-analysis = "pctrans.scripts.casestudy_analysis:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pctrans"]

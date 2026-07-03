@@ -422,6 +422,183 @@ def confusion_matrix_heatmap(confusion_matrix, labels, title="Confusion matrix",
     return fig
 
 
+_BRAF_COLORS = {"mutant": "#d62728", "WT": "#1f77b4"}
+
+
+def _bootstrap_fit_band(x, y, n_boot=500, seed=0, alpha=0.05, n_grid=100):
+    """OLS fit line + percentile bootstrap CI band, evaluated on a grid over ``x``."""
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    n = len(x)
+    grid = np.linspace(x.min(), x.max(), n_grid) if n and x.max() > x.min() else np.zeros(n_grid)
+
+    slope, intercept = np.polyfit(x, y, 1) if n >= 2 else (0.0, float(y.mean()) if n else 0.0)
+    fit = slope * grid + intercept
+
+    rng = np.random.default_rng(seed)
+    preds = np.empty((n_boot, n_grid))
+    for b in range(n_boot):
+        idx = rng.integers(0, n, size=n)
+        xb, yb = x[idx], y[idx]
+        if np.std(xb) == 0:
+            preds[b] = np.mean(yb)
+            continue
+        s, i = np.polyfit(xb, yb, 1)
+        preds[b] = s * grid + i
+    lo = np.percentile(preds, 100.0 * alpha / 2.0, axis=0)
+    hi = np.percentile(preds, 100.0 * (1.0 - alpha / 2.0), axis=0)
+    return grid, fit, lo, hi
+
+
+def braf_casestudy_panel(
+    coords,
+    braf_status,
+    domain_labels,
+    proximity,
+    vemurafenib_auc,
+    response_status,
+    placement_result,
+    response_result,
+    title="BRAF / vemurafenib case study (Day 23)",
+):
+    """Static matplotlib two-panel figure for the Day 23 case study.
+
+    Left: 2-D projection of the pooled SKCM cell-line + patient embeddings,
+    coloured by BRAF status (mutant red / WT blue), marker = domain (cell
+    line cross / patient circle) -- the Part-A placement question made
+    visible. Right: cell-line proximity to the BRAF-mutant-patient centroid
+    vs. vemurafenib AUC, coloured by BRAF status, with an OLS fit + bootstrap
+    CI band -- the Part-B response-link question.
+    """
+    import matplotlib.pyplot as plt
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    coords = np.asarray(coords)
+    status = np.asarray(braf_status).astype(str)
+    dom = _domain_names(domain_labels)
+    domain_to_dom_name = {"patient": "TCGA", "cell_line": "CCLE"}
+    for braf in ("mutant", "WT"):
+        for domain in ("patient", "cell_line"):
+            mask = (status == braf) & (dom == domain_to_dom_name[domain])
+            if not mask.any():
+                continue
+            axes[0].scatter(
+                coords[mask, 0],
+                coords[mask, 1],
+                c=_BRAF_COLORS[braf],
+                marker="X" if domain == "cell_line" else "o",
+                s=70 if domain == "cell_line" else 20,
+                alpha=0.9 if domain == "cell_line" else 0.45,
+                edgecolors="black" if domain == "cell_line" else "none",
+                linewidths=0.6,
+                label=f"{braf} · {'cell line' if domain == 'cell_line' else 'patient'}",
+            )
+    axes[0].set_title(
+        f"Part A — placement (p={placement_result['p_value']:.3g}, "
+        f"effect={placement_result['effect_size']:.2f})"
+    )
+    axes[0].set_xlabel("UMAP-1")
+    axes[0].set_ylabel("UMAP-2")
+    axes[0].legend(fontsize=8, framealpha=0.9)
+
+    proximity = np.asarray(proximity, dtype=float)
+    auc = np.asarray(vemurafenib_auc, dtype=float)
+    resp_status = np.asarray(response_status).astype(str)
+    grid, fit, lo, hi = _bootstrap_fit_band(proximity, auc)
+    axes[1].fill_between(grid, lo, hi, color="#7f7f7f", alpha=0.25, label="bootstrap 95% CI")
+    axes[1].plot(grid, fit, color="black", linewidth=1.5, label="OLS fit")
+    for braf in ("mutant", "WT"):
+        mask = resp_status == braf
+        if not mask.any():
+            continue
+        axes[1].scatter(
+            proximity[mask], auc[mask], c=_BRAF_COLORS[braf], s=45, alpha=0.85,
+            edgecolors="black", linewidths=0.5, label=braf,
+        )
+    axes[1].set_title(
+        f"Part B — response link (ρ={response_result['rho']:.2f}, "
+        f"95% CI [{response_result['ci_low']:.2f}, {response_result['ci_high']:.2f}], "
+        f"n={response_result['n']})"
+    )
+    axes[1].set_xlabel("Proximity to BRAF-mutant-patient centroid (−distance)")
+    axes[1].set_ylabel("Vemurafenib AUC (lower = more sensitive)")
+    axes[1].legend(fontsize=8, framealpha=0.9)
+
+    fig.suptitle(title)
+    fig.tight_layout()
+    return fig
+
+
+def braf_casestudy_panel_interactive(
+    coords,
+    braf_status,
+    domain_labels,
+    sample_ids,
+    proximity,
+    vemurafenib_auc,
+    response_status,
+    response_sample_ids,
+):
+    """Interactive plotly two-panel version of `braf_casestudy_panel` (for HTML export)."""
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+
+    coords = np.asarray(coords)
+    status = np.asarray(braf_status).astype(str)
+    dom = _domain_names(domain_labels)
+    ids = np.asarray(sample_ids).astype(str)
+
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=("Part A — placement", "Part B — response link"),
+    )
+
+    for braf in ("mutant", "WT"):
+        for domain, symbol, size, opacity in (("TCGA", "circle", 7, 0.5), ("CCLE", "x", 11, 0.95)):
+            mask = (status == braf) & (dom == domain)
+            if not mask.any():
+                continue
+            fig.add_trace(
+                go.Scatter(
+                    x=coords[mask, 0], y=coords[mask, 1], mode="markers",
+                    name=f"{braf} · {domain}",
+                    marker={"color": _BRAF_COLORS[braf], "symbol": symbol, "size": size, "opacity": opacity},
+                    text=ids[mask], hovertemplate="%{text}<br>%{customdata}<extra></extra>",
+                    customdata=[f"{braf} · {domain}"] * int(mask.sum()),
+                ),
+                row=1, col=1,
+            )
+
+    proximity = np.asarray(proximity, dtype=float)
+    auc = np.asarray(vemurafenib_auc, dtype=float)
+    resp_status = np.asarray(response_status).astype(str)
+    resp_ids = np.asarray(response_sample_ids).astype(str)
+    for braf in ("mutant", "WT"):
+        mask = resp_status == braf
+        if not mask.any():
+            continue
+        fig.add_trace(
+            go.Scatter(
+                x=proximity[mask], y=auc[mask], mode="markers",
+                name=f"{braf} (vemurafenib)",
+                marker={"color": _BRAF_COLORS[braf], "size": 9, "opacity": 0.85},
+                text=resp_ids[mask], hovertemplate="%{text}<extra></extra>",
+            ),
+            row=1, col=2,
+        )
+
+    fig.update_xaxes(title_text="UMAP-1", row=1, col=1)
+    fig.update_yaxes(title_text="UMAP-2", row=1, col=1)
+    fig.update_xaxes(title_text="Proximity to BRAF-mutant-patient centroid", row=1, col=2)
+    fig.update_yaxes(title_text="Vemurafenib AUC (lower = more sensitive)", row=1, col=2)
+    fig.update_layout(
+        title="BRAF / vemurafenib case study (Day 23)",
+        template="plotly_white", width=1300, height=650,
+    )
+    return fig
+
+
 def permutation_null_panel(results, chance_level=None, title="Label-shuffle negative control"):
     """One histogram per Day 21 permutation-test variant, real value marked.
 

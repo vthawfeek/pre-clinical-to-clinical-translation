@@ -1,4 +1,18 @@
-"""BRAF/vemurafenib case-study data assembly -- Day 22.
+"""BRAF/vemurafenib case-study data assembly + placement/response analysis.
+
+Day 22 assembles the data (below); Day 23 adds the two-part hypothesis test
+that makes the embedding biologically meaningful, using vemurafenib's
+established BRAF-V600 dependence as a positive control:
+
+- **Part A -- placement** (`braf_placement_test`): does a BRAF-mutant SKCM
+  *cell line* embed nearer the BRAF-mutant SKCM *patient* centroid than a
+  BRAF-WT line does? This asks whether the model captured a within-melanoma,
+  driver-defined structure -- not just coarse lineage.
+- **Part B -- response link** (`braf_response_link`): among SKCM cell lines,
+  does proximity to that same patient centroid correlate with vemurafenib
+  sensitivity? A positive result ties embedding geometry to a real drug
+  response; a null result is a legitimate, reportable finding about the
+  model's current resolution, not a failure to hide.
 
 Ties the 3-lineage model to one real, textbook translational fact: vemurafenib
 (PLX4032) is only active against BRAF-V600-mutant melanoma. Assembling that
@@ -34,6 +48,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
+from scipy.stats import mannwhitneyu, spearmanr
 from tqdm import tqdm
 
 CBIOPORTAL_API = "https://www.cbioportal.org/api"
@@ -315,3 +330,151 @@ def coverage_summary(table):
         .value_counts()
         .to_dict(),
     }
+
+
+# --------------------------------------------------------------------------
+# Day 23 -- Part A: placement (does the space recover a driver-defined
+# subgroup?) and Part B: response link (does proximity predict drug response?)
+# --------------------------------------------------------------------------
+
+
+def braf_mutant_patient_centroid(patient_embeddings, patient_status):
+    """Mean embedding of the BRAF-mutant TCGA SKCM patients -- the Part-A reference point."""
+    embeddings = np.asarray(list(patient_embeddings), dtype=np.float64)
+    mask = np.asarray(patient_status) == "mutant"
+    if mask.sum() == 0:
+        raise ValueError("No BRAF-mutant patients available to compute a centroid from.")
+    return embeddings[mask].mean(axis=0)
+
+
+def distance_to_centroid(embeddings, centroid):
+    """Euclidean distance of every row in ``embeddings`` to a fixed ``centroid``."""
+    embeddings = np.asarray(list(embeddings), dtype=np.float64)
+    centroid = np.asarray(centroid, dtype=np.float64)
+    return np.linalg.norm(embeddings - centroid, axis=1)
+
+
+def pairwise_greater_fraction(greater_group, less_group):
+    """Fraction of (greater, less) pairs where ``greater`` truly exceeds ``less`` (ties = 0.5).
+
+    A direct, easily-tested common-language effect size: 1.0 means every value
+    in ``greater_group`` exceeds every value in ``less_group``; 0.5 means no
+    separation; 0.0 means the ordering is reversed.
+    """
+    greater_group = np.asarray(greater_group, dtype=np.float64)
+    less_group = np.asarray(less_group, dtype=np.float64)
+    if greater_group.size == 0 or less_group.size == 0:
+        return float("nan")
+    diff = greater_group[:, None] - less_group[None, :]
+    return float(((diff > 0).sum() + 0.5 * (diff == 0).sum()) / diff.size)
+
+
+def _bootstrap_two_sample_ci(a, b, statistic, n_boot=2000, seed=0, alpha=0.05):
+    """Percentile bootstrap CI for a two-sample ``statistic(a, b)``, resampled independently."""
+    a = np.asarray(a, dtype=np.float64)
+    b = np.asarray(b, dtype=np.float64)
+    point = float(statistic(a, b))
+    if a.size == 0 or b.size == 0:
+        return {"point": point, "ci_low": point, "ci_high": point, "n_boot": n_boot}
+    rng = np.random.default_rng(seed)
+    boots = np.empty(n_boot, dtype=np.float64)
+    for i in range(n_boot):
+        a_boot = a[rng.integers(0, a.size, size=a.size)]
+        b_boot = b[rng.integers(0, b.size, size=b.size)]
+        boots[i] = statistic(a_boot, b_boot)
+    lo = float(np.percentile(boots, 100.0 * alpha / 2.0))
+    hi = float(np.percentile(boots, 100.0 * (1.0 - alpha / 2.0)))
+    return {"point": point, "ci_low": lo, "ci_high": hi, "n_boot": n_boot}
+
+
+def braf_placement_test(
+    cell_line_embeddings, cell_line_status, patient_embeddings, patient_status, n_boot=2000, seed=0, alpha=0.05
+):
+    """Part A: are BRAF-mutant SKCM cell lines closer to the BRAF-mutant-patient centroid than WT lines?
+
+    Computes the BRAF-mutant patient centroid, then a one-sided Mann-Whitney U
+    test (mutant-line distances stochastically *less* than WT-line distances)
+    plus a bootstrapped common-language effect size (``pairwise_greater_fraction``
+    of WT distance > mutant distance -- 1.0 is perfect separation, 0.5 is none).
+    """
+    centroid = braf_mutant_patient_centroid(patient_embeddings, patient_status)
+    distances = distance_to_centroid(cell_line_embeddings, centroid)
+    status = np.asarray(cell_line_status)
+    mut_d = distances[status == "mutant"]
+    wt_d = distances[status == "WT"]
+    if mut_d.size == 0 or wt_d.size == 0:
+        raise ValueError("Need at least one BRAF-mutant and one BRAF-WT cell line to run the placement test.")
+
+    u_stat, p_value = mannwhitneyu(mut_d, wt_d, alternative="less")
+    effect = _bootstrap_two_sample_ci(
+        wt_d, mut_d, pairwise_greater_fraction, n_boot=n_boot, seed=seed, alpha=alpha
+    )
+
+    return {
+        "centroid": centroid.tolist(),
+        "n_mutant": int(mut_d.size),
+        "n_wt": int(wt_d.size),
+        "median_distance_mutant": float(np.median(mut_d)),
+        "median_distance_wt": float(np.median(wt_d)),
+        "u_statistic": float(u_stat),
+        "p_value": float(p_value),
+        "effect_size": effect["point"],
+        "effect_size_ci_low": effect["ci_low"],
+        "effect_size_ci_high": effect["ci_high"],
+        "n_boot": n_boot,
+    }
+
+
+def spearman_with_ci(x, y, n_boot=2000, seed=0, alpha=0.05):
+    """Spearman rho with a percentile bootstrap CI (paired resampling of ``x``/``y``)."""
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    n = x.size
+    rho, p_value = spearmanr(x, y) if n >= 2 else (0.0, 1.0)
+    rho = float(rho) if np.isfinite(rho) else 0.0
+
+    if n < 2:
+        return {"rho": rho, "p_value": float(p_value), "ci_low": rho, "ci_high": rho, "n_boot": n_boot, "n": n}
+
+    rng = np.random.default_rng(seed)
+    boots = np.empty(n_boot, dtype=np.float64)
+    for i in range(n_boot):
+        idx = rng.integers(0, n, size=n)
+        r, _ = spearmanr(x[idx], y[idx])
+        boots[i] = r if np.isfinite(r) else 0.0
+    lo = float(np.percentile(boots, 100.0 * alpha / 2.0))
+    hi = float(np.percentile(boots, 100.0 * (1.0 - alpha / 2.0)))
+    return {"rho": rho, "p_value": float(p_value), "ci_low": lo, "ci_high": hi, "n_boot": n_boot, "n": n}
+
+
+def braf_response_link(
+    cell_line_embeddings,
+    cell_line_status,
+    cell_line_vemurafenib_auc,
+    patient_embeddings,
+    patient_status,
+    n_boot=2000,
+    seed=0,
+    alpha=0.05,
+):
+    """Part B: does proximity to the BRAF-mutant-patient centroid track vemurafenib sensitivity?
+
+    ``proximity`` is defined as the negative distance to the Part-A centroid
+    (higher = closer). Hypothesis: lines placed closer (higher proximity) are
+    the more sensitive lines, i.e. *lower* AUC -- so a positive result is a
+    **negative** Spearman rho between proximity and raw AUC. Restricted to
+    cell lines with a finite ``vemurafenib_auc`` (not every SKCM line was
+    screened -- see Day 22 coverage).
+    """
+    centroid = braf_mutant_patient_centroid(patient_embeddings, patient_status)
+    distances = distance_to_centroid(cell_line_embeddings, centroid)
+    auc = np.asarray(cell_line_vemurafenib_auc, dtype=np.float64)
+    mask = np.isfinite(auc)
+    if mask.sum() < 2:
+        raise ValueError("Need at least 2 cell lines with a vemurafenib AUC to compute a correlation.")
+
+    proximity = -distances[mask]
+    result = spearman_with_ci(proximity, auc[mask], n_boot=n_boot, seed=seed, alpha=alpha)
+    result["n_mutant"] = int((np.asarray(cell_line_status)[mask] == "mutant").sum())
+    result["n_wt"] = int((np.asarray(cell_line_status)[mask] == "WT").sum())
+    return result

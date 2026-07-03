@@ -15,6 +15,8 @@ matplotlib.use("Agg")  # headless: no display in CI
 from pctrans.evaluation.viz import (  # noqa: E402
     LINEAGE_COLORS,
     before_after_panel,
+    braf_casestudy_panel,
+    braf_casestudy_panel_interactive,
     confusion_matrix_heatmap,
     lineage_domain_scatter,
     lineage_domain_scatter_static,
@@ -169,3 +171,41 @@ def test_permutation_null_panel_one_axis_per_variant():
     }
     fig = permutation_null_panel(results, chance_level=1 / 15)
     assert len(fig.axes) == 2
+
+
+def _braf_casestudy_inputs():
+    rng = np.random.default_rng(0)
+    coords = rng.normal(size=(10, 2))
+    braf_status = np.array(["mutant"] * 5 + ["WT"] * 5)
+    domain = np.array([0, 0, 1, 1, 1, 0, 0, 1, 1, 1])  # 0=CCLE, 1=TCGA
+    sample_ids = np.array([f"S{i}" for i in range(10)])
+    proximity = rng.normal(size=6)
+    auc = rng.uniform(0, 1, size=6)
+    response_status = np.array(["mutant"] * 3 + ["WT"] * 3)
+    response_ids = np.array([f"R{i}" for i in range(6)])
+    placement_result = {"p_value": 0.01, "effect_size": 0.9}
+    response_result = {"rho": -0.5, "ci_low": -0.8, "ci_high": -0.1, "n": 6}
+    return (
+        coords, braf_status, domain, sample_ids, proximity, auc, response_status, response_ids,
+        placement_result, response_result,
+    )
+
+
+def test_braf_casestudy_panel_returns_two_axes():
+    (coords, braf_status, domain, _sample_ids, proximity, auc, response_status, _response_ids,
+     placement_result, response_result) = _braf_casestudy_inputs()
+    fig = braf_casestudy_panel(
+        coords, braf_status, domain, proximity, auc, response_status, placement_result, response_result,
+    )
+    assert len(fig.axes) == 2
+
+
+def test_braf_casestudy_panel_interactive_has_two_subplots():
+    (coords, braf_status, domain, sample_ids, proximity, auc, response_status, response_ids,
+     _placement_result, _response_result) = _braf_casestudy_inputs()
+    fig = braf_casestudy_panel_interactive(
+        coords, braf_status, domain, sample_ids, proximity, auc, response_status, response_ids,
+    )
+    assert len(fig.data) > 0
+    xaxis_titles = {fig.layout[k].title.text for k in fig.layout if k.startswith("xaxis")}
+    assert "UMAP-1" in xaxis_titles
