@@ -1,13 +1,17 @@
 """Day 10 evaluation-module tests: kNN retrieval, silhouette, and TFS."""
 
 import numpy as np
+import pytest
 import torch
 from torch.utils.data import DataLoader
 
-from pctrans.data.dataset import LINEAGE_TO_IDX
+from pctrans.data.dataset import LINEAGE_TO_IDX, build_lineage_maps
 from pctrans.evaluation.knn import (
+    KNOWN_CONFUSABLE_PAIRS,
+    confusable_pair_mass,
     knn_accuracy_from_embeddings,
     knn_retrieval_accuracy,
+    top_confusions,
 )
 from pctrans.evaluation.silhouette import (
     cross_domain_silhouette,
@@ -16,6 +20,11 @@ from pctrans.evaluation.silhouette import (
 from pctrans.evaluation.tfs import per_cell_line_tfs, translational_fidelity_score
 
 LUAD, BRCA, SKCM = LINEAGE_TO_IDX["LUAD"], LINEAGE_TO_IDX["BRCA"], LINEAGE_TO_IDX["SKCM"]
+
+_LINEAGES_15 = [
+    "BLCA", "BRCA", "COAD", "GBM", "HNSC", "KIRC", "LGG", "LIHC",
+    "LUAD", "LUSC", "OV", "PAAD", "READ", "SKCM", "STAD",
+]
 
 
 def _perfect_embeddings(n_ccle_per=3, n_tcga_per=10):
@@ -67,6 +76,87 @@ def test_knn_retrieval_accuracy_end_to_end(small_model, tiny_ccle_dataset, tiny_
     assert 0.0 <= res["overall_accuracy"] <= 1.0
     assert set(res["embeddings"]) == {"z_ccle", "y_ccle", "z_tcga", "y_tcga"}
     assert res["embeddings"]["z_ccle"].shape[0] == len(tiny_ccle_dataset)
+
+
+# --- Day 19: 15-lineage confusion-matrix generalisation + error-structure ---
+
+
+def test_knn_accuracy_from_embeddings_accepts_custom_lineage_map():
+    # A 5-lineage config-driven map (Day 18 build_lineage_maps) must produce a
+    # 5x5 confusion matrix, not silently fall back to the 3-lineage default.
+    lineages = ["BLCA", "BRCA", "GBM", "LUAD", "SKCM"]
+    lineage_to_idx, idx_to_lineage = build_lineage_maps(lineages)
+    onehot = np.eye(5, dtype=np.float64)
+    z_ccle = np.concatenate([np.tile(onehot[i], (3, 1)) for i in range(5)])
+    y_ccle = np.array([i for i in range(5) for _ in range(3)])
+    z_tcga = np.concatenate([np.tile(onehot[i], (10, 1)) for i in range(5)])
+    y_tcga = np.array([i for i in range(5) for _ in range(10)])
+
+    res = knn_accuracy_from_embeddings(
+        z_ccle, y_ccle, z_tcga, y_tcga, k=5, idx_to_lineage=idx_to_lineage, lineage_order=lineages
+    )
+    assert res["overall_accuracy"] == 1.0
+    assert np.array(res["confusion_matrix"]).shape == (5, 5)
+    assert res["confusion_labels"] == lineages
+    assert set(res["per_lineage"]) == set(lineages)
+
+
+@pytest.fixture
+def eval15():
+    """Synthetic 15-lineage confusion result, off-diagonal mass concentrated on
+    the plan's named confusable pairs (LUAD-LUSC, GBM-LGG, COAD-READ, LUSC-HNSC)."""
+    labels = list(_LINEAGES_15)
+    idx = {lab: i for i, lab in enumerate(labels)}
+    n = len(labels)
+    cm = np.eye(n, dtype=int) * 20  # strong diagonal: mostly correct
+
+    def bump(a, b, count):
+        cm[idx[a], idx[b]] += count
+
+    bump("LUAD", "LUSC", 6)
+    bump("LUSC", "LUAD", 3)
+    bump("GBM", "LGG", 5)
+    bump("LGG", "GBM", 4)
+    bump("COAD", "READ", 4)
+    bump("READ", "COAD", 3)
+    bump("LUSC", "HNSC", 3)
+    # A little unrelated noise so the "majority, not all" claim is meaningful.
+    bump("BRCA", "OV", 1)
+    bump("KIRC", "STAD", 1)
+
+    return {"confusion_matrix": cm.tolist(), "confusion_labels": labels}
+
+
+def test_confusion_matrix_is_15x15(eval15):
+    cm = np.array(eval15["confusion_matrix"])
+    assert cm.shape == (15, 15)
+    assert len(eval15["confusion_labels"]) == 15
+    assert len(set(eval15["confusion_labels"])) == 15
+
+
+def test_offdiagonal_mass_on_related_pairs(eval15):
+    mass = confusable_pair_mass(
+        eval15["confusion_matrix"], eval15["confusion_labels"], KNOWN_CONFUSABLE_PAIRS
+    )
+    # Majority of the off-diagonal (error) mass sits on the curated biologically-
+    # related pairs, not scattered randomly across all 15*14 off-diagonal cells.
+    assert mass > 0.5
+
+
+def test_top_confusions_sorted_descending(eval15):
+    top = top_confusions(eval15["confusion_matrix"], eval15["confusion_labels"], top_n=3)
+    assert len(top) == 3
+    counts = [t[2] for t in top]
+    assert counts == sorted(counts, reverse=True)
+    # The single largest confusion is the LUAD->LUSC bump (count 6).
+    assert top[0][:2] == ("LUAD", "LUSC")
+
+
+def test_confusable_pair_mass_zero_when_no_pairs_present():
+    labels = ["LUAD", "BRCA", "SKCM"]
+    cm = [[10, 1, 0], [0, 10, 1], [1, 0, 10]]  # off-diagonal misses are all unnamed pairs
+    mass = confusable_pair_mass(cm, labels, KNOWN_CONFUSABLE_PAIRS)
+    assert mass == 0.0
 
 
 def test_silhouette_perfect_clusters():

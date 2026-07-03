@@ -18,10 +18,19 @@ import torch
 from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import NearestNeighbors
 
-from pctrans.data.dataset import IDX_TO_LINEAGE, LINEAGE_TO_IDX
+from pctrans.data.dataset import IDX_TO_LINEAGE
 
 LINEAGE_ORDER = ["LUAD", "BRCA", "SKCM"]
 DEFAULT_K_VALUES = (1, 3, 5, 10)
+
+# Day 19: lineage pairs the plan expects a harder (15-lineage) model to confuse,
+# because they are genuinely related biology, not because the model is broken.
+KNOWN_CONFUSABLE_PAIRS = [
+    ("LUAD", "LUSC"),  # lung adeno vs. squamous
+    ("GBM", "LGG"),  # high- vs. low-grade glioma
+    ("COAD", "READ"),  # colon vs. rectal adenocarcinoma
+    ("LUSC", "HNSC"),  # squamous histology shared with head & neck
+]
 
 
 def embed_loader(encode_fn, loader):
@@ -44,7 +53,14 @@ def _row_majority(labels_2d):
 
 
 def knn_accuracy_from_embeddings(
-    z_ccle, y_ccle, z_tcga, y_tcga, k=5, k_values=DEFAULT_K_VALUES
+    z_ccle,
+    y_ccle,
+    z_tcga,
+    y_tcga,
+    k=5,
+    k_values=DEFAULT_K_VALUES,
+    idx_to_lineage=None,
+    lineage_order=None,
 ):
     """kNN retrieval accuracy of CCLE anchors against a TCGA gallery.
 
@@ -52,7 +68,16 @@ def knn_accuracy_from_embeddings(
     confusion matrix (rows = true CCLE lineage, cols = predicted), a supplementary
     ``k_table`` at ``k_values``, and the per-CCLE-sample neighbour match fraction
     at ``k`` (used for per-cell-line TFS).
+
+    ``idx_to_lineage``/``lineage_order`` default to the Phase-1 3-lineage module
+    constants; pass the Day 18 ``build_lineage_maps`` output (and its lineage
+    list) to score an arbitrary-size lineage set, e.g. the Day 19 15-lineage run.
     """
+    if idx_to_lineage is None:
+        idx_to_lineage = IDX_TO_LINEAGE
+    if lineage_order is None:
+        lineage_order = LINEAGE_ORDER
+
     z_ccle = np.asarray(z_ccle, dtype=np.float64)
     z_tcga = np.asarray(z_tcga, dtype=np.float64)
     y_ccle = np.asarray(y_ccle)
@@ -81,12 +106,13 @@ def knn_accuracy_from_embeddings(
         k_table[kk] = float((p == y_ccle).mean()) if n_ccle else 0.0
 
     per_lineage = {}
-    for idx, lineage in IDX_TO_LINEAGE.items():
+    for idx, lineage in idx_to_lineage.items():
         mask = y_ccle == idx
         if mask.any():
             per_lineage[lineage] = float(correct[mask].mean())
 
-    label_ids = [LINEAGE_TO_IDX[lineage] for lineage in LINEAGE_ORDER]
+    lineage_to_idx = {lineage: idx for idx, lineage in idx_to_lineage.items()}
+    label_ids = [lineage_to_idx[lineage] for lineage in lineage_order]
     cm = confusion_matrix(y_ccle, preds, labels=label_ids).tolist()
 
     return {
@@ -94,7 +120,7 @@ def knn_accuracy_from_embeddings(
         "overall_accuracy": float(correct.mean()) if n_ccle else 0.0,
         "per_lineage": per_lineage,
         "confusion_matrix": cm,
-        "confusion_labels": LINEAGE_ORDER,
+        "confusion_labels": lineage_order,
         "k_table": k_table,
         "match_fraction": match_fraction,
         "ccle_labels": y_ccle,
@@ -102,7 +128,13 @@ def knn_accuracy_from_embeddings(
 
 
 def knn_retrieval_accuracy(
-    model, ccle_test_loader, tcga_test_loader, k=5, k_values=DEFAULT_K_VALUES
+    model,
+    ccle_test_loader,
+    tcga_test_loader,
+    k=5,
+    k_values=DEFAULT_K_VALUES,
+    idx_to_lineage=None,
+    lineage_order=None,
 ):
     """Embed the frozen model's test sets and score kNN@k retrieval.
 
@@ -118,7 +150,14 @@ def knn_retrieval_accuracy(
         model.train()
 
     result = knn_accuracy_from_embeddings(
-        z_ccle, y_ccle, z_tcga, y_tcga, k=k, k_values=k_values
+        z_ccle,
+        y_ccle,
+        z_tcga,
+        y_tcga,
+        k=k,
+        k_values=k_values,
+        idx_to_lineage=idx_to_lineage,
+        lineage_order=lineage_order,
     )
     result["embeddings"] = {
         "z_ccle": z_ccle,
@@ -127,3 +166,48 @@ def knn_retrieval_accuracy(
         "y_tcga": y_tcga,
     }
     return result
+
+
+def top_confusions(confusion_matrix, labels, top_n=10):
+    """Top off-diagonal ``(true, pred, count)`` triples, sorted by count descending.
+
+    ``confusion_matrix`` is a square (n, n) array/list (rows = true, cols =
+    predicted); ``labels`` names each row/column in order (as returned by
+    ``knn_accuracy_from_embeddings``'s ``confusion_labels``).
+    """
+    cm = np.asarray(confusion_matrix)
+    n = cm.shape[0]
+    triples = [
+        (labels[i], labels[j], int(cm[i, j]))
+        for i in range(n)
+        for j in range(n)
+        if i != j and cm[i, j] > 0
+    ]
+    triples.sort(key=lambda t: t[2], reverse=True)
+    return triples[:top_n]
+
+
+def confusable_pair_mass(confusion_matrix, labels, pairs=KNOWN_CONFUSABLE_PAIRS):
+    """Fraction of total off-diagonal error mass that falls on ``pairs``.
+
+    Each pair is treated as unordered (a true-A/pred-B miss counts the same as
+    true-B/pred-A). Used to check whether a harder model's mistakes concentrate
+    on biologically-related lineages rather than scattering randomly.
+    """
+    cm = np.asarray(confusion_matrix, dtype=float)
+    n = cm.shape[0]
+    label_to_idx = {label: i for i, label in enumerate(labels)}
+
+    off_diag_total = cm.sum() - np.trace(cm)
+    if off_diag_total <= 0:
+        return 0.0
+
+    pair_cells = set()
+    for a, b in pairs:
+        if a in label_to_idx and b in label_to_idx:
+            ia, ib = label_to_idx[a], label_to_idx[b]
+            pair_cells.add((ia, ib))
+            pair_cells.add((ib, ia))
+
+    pair_mass = sum(cm[i, j] for i, j in pair_cells if i < n and j < n)
+    return float(pair_mass / off_diag_total)

@@ -18,9 +18,9 @@ import typer
 import yaml
 from torch.utils.data import DataLoader
 
-from pctrans.data.dataset import IDX_TO_LINEAGE, CCLEDataset, TCGADataset
+from pctrans.data.dataset import CCLEDataset, TCGADataset, build_lineage_maps
 from pctrans.data.preprocessor import DataSplitter
-from pctrans.evaluation.baselines import RANDOM_BASELINE, pca_knn
+from pctrans.evaluation.baselines import pca_knn
 from pctrans.evaluation.knn import knn_retrieval_accuracy
 from pctrans.evaluation.silhouette import (
     cross_domain_silhouette,
@@ -34,6 +34,7 @@ from pctrans.models.encoders import CCLEEncoder, TCGAEncoder
 app = typer.Typer()
 
 DEPLOY_THRESHOLD = 0.70
+_DEFAULT_LINEAGES = ["LUAD", "BRCA", "SKCM"]
 
 
 def _load_yaml(path):
@@ -72,17 +73,24 @@ def main(
     splits_file: str = "splits.json",
     scalers_file: str = "scalers.pkl",
     model_config: str = "configs/model.yaml",
+    data_config: str = "configs/data.yaml",
     k: int = 5,
     output: str = "reports/eval_summary.json",
 ):
     """Evaluate the trained dual-tower model on the held-out test set (Gate 1).
 
     ``--ccle-file/--tcga-file/--splits-file/--scalers-file`` let this evaluate an
-    alternate artefact set (e.g. Day 16's ``*_trainhvg`` outputs) without touching
-    the Phase-1 defaults.
+    alternate artefact set (e.g. Day 16's ``*_trainhvg`` or Day 18's ``*_15``
+    outputs) without touching the Phase-1 defaults. ``--data-config`` (Day 18/19)
+    supplies the lineage list used to build the label-id map and confusion-matrix
+    axes -- point it at ``configs/data_15.yaml`` for the 15-lineage run.
     """
     data_dir = Path(data_dir)
     model_cfg = _load_yaml(model_config)
+    data_cfg = _load_yaml(data_config) if Path(data_config).exists() else {}
+    lineages = data_cfg.get("lineages", _DEFAULT_LINEAGES)
+    lineage_to_idx, idx_to_lineage = build_lineage_maps(lineages)
+    random_baseline = 1.0 / len(lineages)
 
     ccle_df = pd.read_parquet(data_dir / ccle_file)
     tcga_df = pd.read_parquet(data_dir / tcga_file)
@@ -96,8 +104,8 @@ def main(
     def scaled(df, ids):
         return splitter.apply_scalers(df.loc[ids], scalers)
 
-    ccle_test = CCLEDataset(scaled(ccle_df, splits["ccle"]["test"]))
-    tcga_test = TCGADataset(scaled(tcga_df, splits["tcga"]["test"]))
+    ccle_test = CCLEDataset(scaled(ccle_df, splits["ccle"]["test"]), lineage_to_idx=lineage_to_idx)
+    tcga_test = TCGADataset(scaled(tcga_df, splits["tcga"]["test"]), lineage_to_idx=lineage_to_idx)
     typer.echo(f"Test set: CCLE {len(ccle_test)} + TCGA {len(tcga_test)}")
 
     net = _build_model(model_cfg)
@@ -110,7 +118,9 @@ def main(
     ccle_loader = DataLoader(ccle_test, batch_size=256, shuffle=False)
     tcga_loader = DataLoader(tcga_test, batch_size=256, shuffle=False)
 
-    knn = knn_retrieval_accuracy(net, ccle_loader, tcga_loader, k=k)
+    knn = knn_retrieval_accuracy(
+        net, ccle_loader, tcga_loader, k=k, idx_to_lineage=idx_to_lineage, lineage_order=lineages
+    )
     overall = knn["overall_accuracy"]
 
     # Pool embeddings (CCLE first) for silhouette + per-cell-line TFS.
@@ -140,7 +150,7 @@ def main(
     per_cell_line = [
         {
             "id": str(cid),
-            "lineage": IDX_TO_LINEAGE[int(lbl)],
+            "lineage": idx_to_lineage[int(lbl)],
             "knn_match_fraction": float(mf),
             "silhouette": float(sc),
             "tfs": float(tfs),
@@ -151,7 +161,9 @@ def main(
     ]
     per_cell_line.sort(key=lambda r: r["tfs"], reverse=True)
 
-    pca_baseline = pca_knn(ccle_test, tcga_test, k=k)
+    pca_baseline = pca_knn(
+        ccle_test, tcga_test, k=k, idx_to_lineage=idx_to_lineage, lineage_order=lineages
+    )
     decision, band = _decision(overall)
 
     # -- Gate 1 report ---------------------------------------------------------
@@ -183,7 +195,7 @@ def main(
         f"[boot 95% CI {sil_boot['ci_low']:+.2f}, {sil_boot['ci_high']:+.2f}]"
     )
     typer.echo(f"TFS (composite):   {tfs_overall:.2f}    (> 0.6 = deploy)")
-    typer.echo(f"Random baseline:   {RANDOM_BASELINE * 100:.1f}%")
+    typer.echo(f"Random baseline:   {random_baseline * 100:.1f}%   (1/{len(lineages)} lineages)")
     typer.echo(f"PCA+kNN baseline:  {pca_baseline * 100:.1f}%")
     typer.echo("Real Harmony/ComBat/Scanorama + supervised ceiling: run pctrans-baselines")
     typer.echo(bar)
@@ -195,6 +207,7 @@ def main(
         "checkpoint_epoch": ckpt_epoch,
         "checkpoint_val_knn_accuracy": ckpt_val_knn,
         "test_sizes": {"ccle": len(ccle_test), "tcga": len(tcga_test)},
+        "lineages": lineages,
         "k": knn["k"],
         "overall_knn_accuracy": overall,
         "knn_wilson_ci": {"low": knn_wilson[0], "high": knn_wilson[1], "n": n_anchors},
@@ -207,7 +220,7 @@ def main(
         "silhouette_score": silhouette,
         "tfs_overall": tfs_overall,
         "baselines": {
-            "random": RANDOM_BASELINE,
+            "random": random_baseline,
             "pca_knn": pca_baseline,
         },
         "decision": decision,

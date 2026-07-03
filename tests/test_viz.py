@@ -15,6 +15,7 @@ matplotlib.use("Agg")  # headless: no display in CI
 from pctrans.evaluation.viz import (  # noqa: E402
     LINEAGE_COLORS,
     before_after_panel,
+    confusion_matrix_heatmap,
     lineage_domain_scatter,
     lineage_domain_scatter_static,
     tfs_ranking_bar,
@@ -102,3 +103,43 @@ def test_umap_projection_shape():
     z = rng.normal(size=(40, 16)).astype(np.float32)
     coords = umap_projection(z, n_neighbors=15, seed=42)
     assert coords.shape == (40, 2)
+
+
+# --- Day 19: 5+-lineage overrides + confusion-matrix heatmap ---
+
+
+def test_lineage_domain_scatter_accepts_lineage_order_override():
+    # A 5-lineage set outside the Phase-1 default LINEAGE_ORDER/IDX_TO_LINEAGE
+    # must render every point, proving the override (not the module default) drives it.
+    order = ["BLCA", "BRCA", "GBM", "LUAD", "SKCM"]
+    idx_to_lineage = dict(enumerate(order))
+    rng = np.random.default_rng(3)
+    n_per = 4
+    coords = rng.normal(size=(n_per * len(order) * 2, 2))
+    lineage = np.repeat(np.arange(len(order)), n_per * 2)
+    domain = np.tile(np.repeat([0, 1], n_per), len(order))
+
+    fig = lineage_domain_scatter(
+        coords, lineage, domain, "t", lineage_order=order, idx_to_lineage=idx_to_lineage
+    )
+    assert sum(len(tr.x) for tr in fig.data) == len(coords)
+    used = {tr.marker.color for tr in fig.data}
+    assert used <= {LINEAGE_COLORS[lineage_name] for lineage_name in order}
+
+
+def test_confusion_matrix_heatmap_returns_figure():
+    labels = ["LUAD", "LUSC", "BRCA"]
+    cm = [[8, 2, 0], [1, 9, 0], [0, 0, 10]]
+    fig = confusion_matrix_heatmap(cm, labels, title="t")
+    assert fig.axes
+    ax = fig.axes[0]
+    assert [t.get_text() for t in ax.get_xticklabels()] == labels
+
+
+def test_confusion_matrix_heatmap_normalizes_rows():
+    labels = ["A", "B"]
+    cm = [[5, 5], [2, 8]]
+    fig = confusion_matrix_heatmap(cm, labels, normalize=True)
+    im = fig.axes[0].images[0]
+    normalized = im.get_array()
+    np.testing.assert_allclose(normalized, [[0.5, 0.5], [0.2, 0.8]])

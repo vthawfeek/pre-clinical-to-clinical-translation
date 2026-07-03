@@ -33,15 +33,30 @@ def _pooled_arrays(ccle_ds, tcga_ds):
     return x_ccle, x_tcga, pooled
 
 
-def pca_knn(ccle_ds, tcga_ds, n_components=50, k=5, seed=42):
-    """No-alignment baseline: PCA on pooled raw features, then cross-domain kNN."""
+def pca_knn(
+    ccle_ds, tcga_ds, n_components=50, k=5, seed=42, idx_to_lineage=None, lineage_order=None
+):
+    """No-alignment baseline: PCA on pooled raw features, then cross-domain kNN.
+
+    ``idx_to_lineage``/``lineage_order`` default to the Phase-1 3-lineage module
+    constants (see ``pctrans.evaluation.knn``); pass the Day 18 lineage-map output
+    to score this baseline on an arbitrary-size lineage set.
+    """
     from sklearn.decomposition import PCA
 
     x_ccle, x_tcga, pooled = _pooled_arrays(ccle_ds, tcga_ds)
     n_comp = min(n_components, pooled.shape[0], pooled.shape[1])
     coords = PCA(n_components=n_comp, random_state=seed).fit_transform(pooled)
     z_ccle, z_tcga = coords[: len(x_ccle)], coords[len(x_ccle):]
-    res = knn_accuracy_from_embeddings(z_ccle, ccle_ds.labels, z_tcga, tcga_ds.labels, k=k)
+    res = knn_accuracy_from_embeddings(
+        z_ccle,
+        ccle_ds.labels,
+        z_tcga,
+        tcga_ds.labels,
+        k=k,
+        idx_to_lineage=idx_to_lineage,
+        lineage_order=lineage_order,
+    )
     return res["overall_accuracy"]
 
 

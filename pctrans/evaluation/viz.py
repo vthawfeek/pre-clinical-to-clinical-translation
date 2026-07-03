@@ -16,8 +16,29 @@ import numpy as np
 
 from pctrans.data.dataset import IDX_TO_LINEAGE
 
-# Lineage colours (plan: LUAD=blue, BRCA=pink, SKCM=brown).
-LINEAGE_COLORS = {"LUAD": "#1f77b4", "BRCA": "#e377c2", "SKCM": "#8c564b"}
+# Lineage colours (plan: LUAD=blue, BRCA=pink, SKCM=brown). Extended on Day 19 to
+# cover all 15 Phase-2 lineages (`configs/data_15.yaml`); the original 3 keep
+# their Phase-1 hex values so old figures are unaffected. `lineage_domain_scatter`
+# and friends only ever iterate `lineage_order` (default: the 3-lineage
+# `LINEAGE_ORDER` below), so the extra keys are a no-op unless a caller passes a
+# longer `lineage_order`.
+LINEAGE_COLORS = {
+    "LUAD": "#1f77b4",
+    "BRCA": "#e377c2",
+    "SKCM": "#8c564b",
+    "BLCA": "#ff7f0e",
+    "COAD": "#2ca02c",
+    "GBM": "#d62728",
+    "HNSC": "#9467bd",
+    "KIRC": "#17becf",
+    "LGG": "#bcbd22",
+    "LIHC": "#7f7f7f",
+    "LUSC": "#aec7e8",
+    "OV": "#f7b6d2",
+    "PAAD": "#c49c94",
+    "READ": "#98df8a",
+    "STAD": "#ffbb78",
+}
 LINEAGE_ORDER = ["LUAD", "BRCA", "SKCM"]
 
 # Domain 0 = CCLE cell line, 1 = TCGA patient (matches evaluate.py's pooling).
@@ -39,11 +60,12 @@ def _tfs_color(value):
     return _TFS_RED
 
 
-def _lineage_names(labels):
+def _lineage_names(labels, idx_to_lineage=None):
     """Normalise lineage labels (int codes or strings) to lineage-name strings."""
     labels = np.asarray(labels)
     if labels.dtype.kind in "iu":
-        return np.array([IDX_TO_LINEAGE[int(v)] for v in labels])
+        mapping = idx_to_lineage if idx_to_lineage is not None else IDX_TO_LINEAGE
+        return np.array([mapping[int(v)] for v in labels])
     return labels.astype(str)
 
 
@@ -77,17 +99,28 @@ def umap_projection(embeddings, n_neighbors=15, min_dist=0.1, n_components=2, se
 
 
 def lineage_domain_scatter(
-    coords, lineage_labels, domain_labels, title, sample_ids=None, tfs_scores=None
+    coords,
+    lineage_labels,
+    domain_labels,
+    title,
+    sample_ids=None,
+    tfs_scores=None,
+    lineage_order=None,
+    idx_to_lineage=None,
 ):
     """Interactive plotly scatter, colour = lineage, marker = domain.
 
     Hover shows the sample ID, its lineage/domain, and (for CCLE cell lines) its
     TFS. One trace per (lineage, domain) pair so the legend toggles cleanly.
+    ``lineage_order``/``idx_to_lineage`` default to the Phase-1 3-lineage module
+    constants; pass the Day 18 ``build_lineage_maps`` output (and its lineage
+    list) to render an arbitrary-size lineage set, e.g. the Day 19 15-lineage UMAP.
     """
     import plotly.graph_objects as go
 
+    order = lineage_order if lineage_order is not None else LINEAGE_ORDER
     coords = np.asarray(coords)
-    lin = _lineage_names(lineage_labels)
+    lin = _lineage_names(lineage_labels, idx_to_lineage)
     dom = _domain_names(domain_labels)
     n = len(coords)
     ids = np.asarray(sample_ids) if sample_ids is not None else np.array([""] * n)
@@ -98,7 +131,7 @@ def lineage_domain_scatter(
     )
 
     fig = go.Figure()
-    for lineage in LINEAGE_ORDER:
+    for lineage in order:
         for domain in ("TCGA", "CCLE"):  # patients first so cell lines sit on top
             mask = (lin == lineage) & (dom == domain)
             if not mask.any():
@@ -181,18 +214,21 @@ def tfs_ranking_bar(cell_line_ids, tfs_scores, top_n=10):
     return fig
 
 
-def lineage_domain_scatter_static(coords, lineage_labels, domain_labels, title, ax=None):
+def lineage_domain_scatter_static(
+    coords, lineage_labels, domain_labels, title, ax=None, lineage_order=None, idx_to_lineage=None
+):
     """Static matplotlib version of `lineage_domain_scatter` (for PNG export)."""
     import matplotlib.pyplot as plt
 
+    order = lineage_order if lineage_order is not None else LINEAGE_ORDER
     coords = np.asarray(coords)
-    lin = _lineage_names(lineage_labels)
+    lin = _lineage_names(lineage_labels, idx_to_lineage)
     dom = _domain_names(domain_labels)
 
     created = ax is None
     if created:
         _, ax = plt.subplots(figsize=(8, 7))
-    for lineage in LINEAGE_ORDER:
+    for lineage in order:
         for domain in ("TCGA", "CCLE"):
             mask = (lin == lineage) & (dom == domain)
             if not mask.any():
@@ -223,6 +259,8 @@ def before_after_panel(
     emb_domain_labels,
     raw_title="Before — PCA of raw expression (domain gap)",
     emb_title="After — UMAP of aligned embeddings (lineage clusters)",
+    lineage_order=None,
+    idx_to_lineage=None,
 ):
     """Two-panel matplotlib figure for Blog Post 2.
 
@@ -259,7 +297,54 @@ def before_after_panel(
     axes[0].legend(fontsize=9, framealpha=0.9)
 
     lineage_domain_scatter_static(
-        emb_coords, emb_lineage_labels, emb_domain_labels, emb_title, ax=axes[1]
+        emb_coords,
+        emb_lineage_labels,
+        emb_domain_labels,
+        emb_title,
+        ax=axes[1],
+        lineage_order=lineage_order,
+        idx_to_lineage=idx_to_lineage,
     )
+    fig.tight_layout()
+    return fig
+
+
+def confusion_matrix_heatmap(confusion_matrix, labels, title="Confusion matrix", normalize=True):
+    """Static matplotlib heatmap of a square confusion matrix (Day 19: 15-lineage read).
+
+    Rows = true lineage, columns = predicted lineage (matches
+    ``knn_accuracy_from_embeddings``'s convention). Row-normalised by default so
+    lineages with very different anchor counts (e.g. READ N=13 vs. BRCA N=1215)
+    are still visually comparable; pass ``normalize=False`` for raw counts.
+    """
+    import matplotlib.pyplot as plt
+
+    cm = np.asarray(confusion_matrix, dtype=float)
+    if normalize:
+        row_sums = cm.sum(axis=1, keepdims=True)
+        cm = np.divide(cm, row_sums, out=np.zeros_like(cm), where=row_sums > 0)
+
+    n = len(labels)
+    fig, ax = plt.subplots(figsize=(0.55 * n + 3, 0.5 * n + 2.5))
+    im = ax.imshow(cm, cmap="Blues", vmin=0, vmax=1.0 if normalize else cm.max())
+    ax.set_xticks(range(n))
+    ax.set_yticks(range(n))
+    ax.set_xticklabels(labels, rotation=45, ha="right")
+    ax.set_yticklabels(labels)
+    ax.set_xlabel("Predicted lineage")
+    ax.set_ylabel("True lineage")
+    ax.set_title(title)
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    fmt = "{:.2f}" if normalize else "{:.0f}"
+    threshold = (1.0 if normalize else cm.max()) / 2
+    for i in range(n):
+        for j in range(n):
+            val = cm[i, j]
+            if val > 0:
+                ax.text(
+                    j, i, fmt.format(val), ha="center", va="center", fontsize=7,
+                    color="white" if val > threshold else "black",
+                )
     fig.tight_layout()
     return fig
