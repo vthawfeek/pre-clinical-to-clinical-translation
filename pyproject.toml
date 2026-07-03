@@ -55,6 +55,7 @@ pctrans-visualize  = "pctrans.scripts.visualize:app"
 pctrans-precompute = "pctrans.scripts.precompute:app"
 pctrans-query      = "pctrans.scripts.query:app"
 pctrans-confounders = "pctrans.scripts.confounders:app"
+pctrans-permutation-test = "pctrans.scripts.permutation_test:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pctrans"]

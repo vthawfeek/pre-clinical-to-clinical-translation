@@ -18,6 +18,7 @@ from pctrans.evaluation.viz import (  # noqa: E402
     confusion_matrix_heatmap,
     lineage_domain_scatter,
     lineage_domain_scatter_static,
+    permutation_null_panel,
     purity_confounder_panel,
     tfs_ranking_bar,
     umap_projection,
@@ -156,4 +157,15 @@ def test_purity_confounder_panel_returns_two_axes():
         "low_purity": {"overall_accuracy": 0.8, "n": 14},
     }
     fig = purity_confounder_panel(projection, purity, domain, strata, reference_line=0.85)
+    assert len(fig.axes) == 2
+
+
+def test_permutation_null_panel_one_axis_per_variant():
+    results = {
+        "eval-only": {"null_values": [0.05, 0.07, 0.1, 0.06], "real_value": 0.78,
+                      "p_value": 0.02, "n_perm": 4},
+        "retrain": {"null_values": [0.04, 0.09, 0.05, 0.08], "real_value": 0.78,
+                    "p_value": 0.02, "n_perm": 4},
+    }
+    fig = permutation_null_panel(results, chance_level=1 / 15)
     assert len(fig.axes) == 2

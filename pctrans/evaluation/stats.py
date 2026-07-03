@@ -18,6 +18,15 @@ Three entry points:
 - `bootstrap_metric_ci` — a convenience wrapper that turns the per-CCLE
   `match_fraction` already produced by `knn.py` into a kNN point estimate + 95% CI,
   so the evaluate CLI can print an interval without re-embedding anything.
+
+Day 21 adds one more entry point, `permutation_test`, for the label-shuffle
+negative control: it turns a real metric value plus a null-generating callback
+into an empirical p-value. The callback is intentionally generic (it just has to
+return a float) so the same function scores both Day 21 variants -- the cheap
+eval-only label shuffle (recompute kNN@5 on already-embedded test points with
+permuted labels) and the expensive retrain-based shuffle (break the CCLE<->TCGA
+lineage correspondence, retrain a short schedule, evaluate) -- without stats.py
+importing anything about models or datasets.
 """
 
 import numpy as np
@@ -108,4 +117,31 @@ def aggregate_seeds(values, alpha=0.05, n_boot=2000, seed=0):
         "ci_low": ci["ci_low"],
         "ci_high": ci["ci_high"],
         "n": n,
+    }
+
+
+def permutation_test(real_value, null_generator, n_perm=20, seed=0):
+    """Empirical one-sided p-value: is ``real_value`` reachable by chance?
+
+    Calls ``null_generator(rng)`` ``n_perm`` times to build the null
+    distribution -- each call shuffles the label correspondence some way and
+    returns the resulting metric as a float -- then reports the fraction of
+    null draws at least as large as ``real_value``. Uses the standard
+    add-one (Laplace) correction ``(count + 1) / (n_perm + 1)`` so a real
+    value that beats every permutation still gets a finite, non-zero p-value
+    rather than the unjustified ``0.0`` a naive ratio would report.
+    """
+    rng = np.random.default_rng(seed)
+    null_values = np.array(
+        [float(null_generator(rng)) for _ in range(n_perm)], dtype=np.float64
+    )
+    count = int(np.sum(null_values >= real_value))
+    p_value = (count + 1) / (n_perm + 1)
+    return {
+        "real_value": float(real_value),
+        "null_values": null_values.tolist(),
+        "null_mean": float(null_values.mean()) if n_perm else 0.0,
+        "null_max": float(null_values.max()) if n_perm else 0.0,
+        "n_perm": n_perm,
+        "p_value": float(p_value),
     }

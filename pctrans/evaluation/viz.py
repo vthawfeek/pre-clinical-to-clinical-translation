@@ -420,3 +420,36 @@ def confusion_matrix_heatmap(confusion_matrix, labels, title="Confusion matrix",
                 )
     fig.tight_layout()
     return fig
+
+
+def permutation_null_panel(results, chance_level=None, title="Label-shuffle negative control"):
+    """One histogram per Day 21 permutation-test variant, real value marked.
+
+    ``results`` is ``{variant_name: permutation_test(...) output}`` -- each
+    entry contributes one subplot: a histogram of that variant's
+    ``null_values`` with a solid vertical line at ``real_value`` and, if
+    given, a dashed line at ``chance_level`` (e.g. ``1 / n_lineages``). The
+    subplot title carries the empirical p-value so the figure is
+    self-contained without reading the companion JSON.
+    """
+    import matplotlib.pyplot as plt
+
+    n = len(results)
+    fig, axes = plt.subplots(1, n, figsize=(6 * n, 4.5), squeeze=False)
+    axes = axes[0]
+
+    for ax, (name, result) in zip(axes, results.items()):
+        null_values = np.asarray(result["null_values"], dtype=float)
+        ax.hist(null_values, bins=min(10, max(3, len(null_values) // 2)),
+                color="#7f7f7f", edgecolor="white", alpha=0.85)
+        ax.axvline(result["real_value"], color="#d62728", linewidth=2, label="real value")
+        if chance_level is not None:
+            ax.axvline(chance_level, color="black", linestyle="--", linewidth=1, label="chance (1/n)")
+        ax.set_xlabel("kNN@5 accuracy")
+        ax.set_ylabel("Permutations")
+        ax.set_title(f"{name}\np = {result['p_value']:.4f}  (n={result['n_perm']})")
+        ax.legend(fontsize=8)
+
+    fig.suptitle(title)
+    fig.tight_layout()
+    return fig

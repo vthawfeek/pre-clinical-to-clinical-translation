@@ -7,6 +7,7 @@ from pctrans.evaluation.stats import (
     aggregate_seeds,
     bootstrap_ci,
     bootstrap_metric_ci,
+    permutation_test,
     wilson_ci,
 )
 
@@ -70,3 +71,42 @@ def test_aggregate_seeds_summary():
     assert abs(agg["mean"] - np.mean(values)) < 1e-9
     assert agg["min"] == 0.92 and agg["max"] == 1.0
     assert agg["ci_low"] <= agg["mean"] <= agg["ci_high"]
+
+
+def test_permutation_null_near_chance():
+    # Day 21: a "shuffled-label model" cannot do better than randomly matching
+    # a permuted label vector against the true one -- for a balanced n_lineages
+    # class label, that expected match rate is ~1/n_lineages.
+    n_lineages = 15
+    rng = np.random.default_rng(0)
+    true_labels = rng.integers(0, n_lineages, size=2000)
+
+    def null_generator(rng):
+        shuffled = rng.permutation(true_labels)
+        return float((shuffled == true_labels).mean())
+
+    result = permutation_test(1.0, null_generator, n_perm=20, seed=1)
+    assert abs(result["null_mean"] - 1.0 / n_lineages) < 0.03
+    assert result["null_max"] < 0.5  # nowhere near the real (correspondence-intact) value
+
+
+def test_permutation_pvalue_range():
+    # p must always land in [0, 1]; a real value that beats every permutation
+    # draw should get a small p-value (real-signal case), not exactly 0. With
+    # the add-one correction the smallest reachable p at n_perm draws is
+    # 1/(n_perm + 1), so use enough draws to get comfortably under 0.01.
+    def chance_generator(rng):
+        return float(rng.uniform(0.0, 0.15))
+
+    result = permutation_test(0.95, chance_generator, n_perm=200, seed=2)
+    assert 0.0 <= result["p_value"] <= 1.0
+    assert result["p_value"] < 0.01
+    assert len(result["null_values"]) == 200
+
+    # A value squarely inside the null distribution should NOT get a small p.
+    def wide_generator(rng):
+        return float(rng.uniform(0.0, 1.0))
+
+    mid_result = permutation_test(0.5, wide_generator, n_perm=200, seed=3)
+    assert 0.0 <= mid_result["p_value"] <= 1.0
+    assert mid_result["p_value"] > 0.1
