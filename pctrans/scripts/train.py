@@ -17,7 +17,7 @@ import pandas as pd
 import typer
 import yaml
 
-from pctrans.data.dataset import CCLEDataset, TCGADataset
+from pctrans.data.dataset import CCLEDataset, TCGADataset, build_lineage_maps
 from pctrans.data.preprocessor import DataSplitter
 from pctrans.data.sampler import StratifiedContrastiveBatchSampler
 from pctrans.models.dual_tower import DualTowerModel
@@ -26,6 +26,8 @@ from pctrans.models.losses import SupConInfoNCELoss
 from pctrans.training.trainer import ContrastiveTrainer
 
 app = typer.Typer()
+
+_DEFAULT_LINEAGES = ["LUAD", "BRCA", "SKCM"]
 
 
 def _load_yaml(path):
@@ -51,6 +53,7 @@ def _build_model(model_cfg):
 def main(
     config: str = "configs/training.yaml",
     model_config: str = "configs/model.yaml",
+    data_config: str = "configs/data.yaml",
     data_dir: str = "data/processed/",
     ccle_file: str = "ccle_2k.parquet",
     tcga_file: str = "tcga_2k.parquet",
@@ -63,13 +66,20 @@ def main(
     """Train the dual-tower model; pass ``--epochs 1`` for the Gate 0 smoke run.
 
     ``--ccle-file/--tcga-file/--splits-file/--scalers-file`` let a run point at an
-    alternate artefact set (e.g. Day 16's ``*_trainhvg`` outputs) without touching
-    the Phase-1 defaults. ``--checkpoint-path`` overrides the config's save path
-    for the same reason (so it never overwrites ``models/best_model.pt``).
+    alternate artefact set (e.g. Day 16's ``*_trainhvg`` or Day 18's ``*_15``
+    outputs) without touching the Phase-1 defaults. ``--checkpoint-path``
+    overrides the config's save path for the same reason (so it never
+    overwrites ``models/best_model.pt``). ``--data-config`` (Day 18) supplies
+    the lineage list used to build the label-id map -- point it at
+    ``configs/data_15.yaml`` for the 15-lineage run so labels 0..14 are built
+    from that config instead of the hardcoded 3-lineage default.
     """
     data_dir = Path(data_dir)
     train_cfg = _load_yaml(config)
     model_cfg = _load_yaml(model_config)
+    data_cfg = _load_yaml(data_config) if Path(data_config).exists() else {}
+    lineages = data_cfg.get("lineages", _DEFAULT_LINEAGES)
+    lineage_to_idx, idx_to_lineage = build_lineage_maps(lineages)
     n_epochs = epochs if epochs is not None else train_cfg.get("n_epochs", 30)
     if checkpoint_path is not None:
         train_cfg = dict(train_cfg)
@@ -87,10 +97,13 @@ def main(
     def scaled(df, ids):
         return splitter.apply_scalers(df.loc[ids], scalers)
 
-    ccle_train = CCLEDataset(scaled(ccle_df, splits["ccle"]["train"]))
-    ccle_val = CCLEDataset(scaled(ccle_df, splits["ccle"]["val"]))
-    tcga_train = TCGADataset(scaled(tcga_df, splits["tcga"]["train"]))
-    tcga_val = TCGADataset(scaled(tcga_df, splits["tcga"]["val"]))
+    def dataset(cls, df, ids):
+        return cls(scaled(df, ids), lineage_to_idx=lineage_to_idx)
+
+    ccle_train = dataset(CCLEDataset, ccle_df, splits["ccle"]["train"])
+    ccle_val = dataset(CCLEDataset, ccle_df, splits["ccle"]["val"])
+    tcga_train = dataset(TCGADataset, tcga_df, splits["tcga"]["train"])
+    tcga_val = dataset(TCGADataset, tcga_df, splits["tcga"]["val"])
 
     typer.echo(
         f"Train: CCLE {len(ccle_train)} + TCGA {len(tcga_train)} | "
@@ -108,7 +121,8 @@ def main(
 
     run_name = train_cfg.get("mlflow_experiment", "pctrans-v1") if mlflow else None
     trainer = ContrastiveTrainer(
-        model, loss_fn, sampler, ccle_val, tcga_val, train_cfg, mlflow_run_name=run_name
+        model, loss_fn, sampler, ccle_val, tcga_val, train_cfg,
+        mlflow_run_name=run_name, idx_to_lineage=idx_to_lineage,
     )
 
     typer.echo(f"Training for {n_epochs} epoch(s)...")

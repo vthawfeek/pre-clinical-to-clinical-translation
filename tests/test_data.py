@@ -7,8 +7,8 @@ import pytest
 from pctrans.data.ccle_client import (
     METADATA_FILENAME as CCLE_METADATA_FILENAME,
 )
-from pctrans.data.ccle_client import CCLEClient, filter_lineages
-from pctrans.data.dataset import LINEAGE_TO_IDX, CCLEDataset, TCGADataset
+from pctrans.data.ccle_client import LINEAGE_ALIASES, CCLEClient, filter_lineages
+from pctrans.data.dataset import LINEAGE_TO_IDX, CCLEDataset, TCGADataset, build_lineage_maps
 from pctrans.data.preprocessor import DataSplitter, FeatureSynchroniser
 from pctrans.data.sampler import StratifiedContrastiveBatchSampler
 from pctrans.data.tcga_client import (
@@ -357,3 +357,119 @@ def test_hvg_flag_reproduces_phase1():
 
     expected = gene_list_path.read_text(encoding="utf-8").split()
     assert hvgs == expected
+
+
+# --- Day 18: config-driven lineages (15-lineage expansion) ---
+
+
+def test_lineage_map_is_config_driven():
+    fifteen = [
+        "BLCA", "BRCA", "COAD", "GBM", "HNSC", "KIRC", "LGG", "LIHC",
+        "LUAD", "LUSC", "OV", "PAAD", "READ", "SKCM", "STAD",
+    ]
+    lineage_to_idx, idx_to_lineage = build_lineage_maps(fifteen)
+    assert len(lineage_to_idx) == 15
+    assert set(lineage_to_idx.values()) == set(range(15))
+    assert idx_to_lineage == {idx: lineage for lineage, idx in lineage_to_idx.items()}
+
+
+def test_build_lineage_maps_reproduces_phase1_default():
+    # The module-level default must stay byte-identical to the original hardcoded
+    # dict -- existing checkpoints and committed embeddings depend on this order.
+    lineage_to_idx, idx_to_lineage = build_lineage_maps(["LUAD", "BRCA", "SKCM"])
+    assert lineage_to_idx == {"LUAD": 0, "BRCA": 1, "SKCM": 2}
+    assert idx_to_lineage == {0: "LUAD", 1: "BRCA", 2: "SKCM"}
+    assert lineage_to_idx == LINEAGE_TO_IDX
+
+
+def test_dataset_accepts_custom_lineage_map():
+    fifteen = [
+        "BLCA", "BRCA", "COAD", "GBM", "HNSC", "KIRC", "LGG", "LIHC",
+        "LUAD", "LUSC", "OV", "PAAD", "READ", "SKCM", "STAD",
+    ]
+    lineage_to_idx, _ = build_lineage_maps(fifteen)
+    df = pd.DataFrame({"G0": [1.0, 2.0], "lineage": ["LUSC", "READ"]})
+    ds = CCLEDataset(df, lineage_to_idx=lineage_to_idx)
+    assert ds.labels.tolist() == [lineage_to_idx["LUSC"], lineage_to_idx["READ"]]
+
+
+def test_ccle_client_resolves_new_day18_lineages():
+    meta = pd.DataFrame(
+        {
+            "ModelID": [f"ACH-{i:06d}" for i in range(6)],
+            "OncotreePrimaryDisease": [
+                "Non-Small Cell Lung Cancer",
+                "Colorectal Adenocarcinoma",
+                "Colorectal Adenocarcinoma",
+                "Diffuse Glioma",
+                "Diffuse Glioma",
+                "Pancreatic Adenocarcinoma",
+            ],
+            "OncotreeSubtype": [
+                "Lung Squamous Cell Carcinoma",
+                "Colon Adenocarcinoma",
+                "Rectal Adenocarcinoma",
+                "Glioblastoma",
+                "Astrocytoma",
+                "Pancreatic Adenocarcinoma",
+            ],
+        }
+    )
+    resolved = meta["OncotreePrimaryDisease"].map(LINEAGE_ALIASES)
+    resolved = resolved.fillna(meta["OncotreeSubtype"].map(LINEAGE_ALIASES))
+    assert resolved.tolist() == ["LUSC", "COAD", "READ", "GBM", "LGG", "PAAD"]
+
+
+def test_drop_incomplete_genes_excludes_any_nan():
+    fs = FeatureSynchroniser()
+    ccle = pd.DataFrame({"CLEAN": [1.0, 2.0], "CCLE_NAN": [1.0, np.nan]})
+    tcga = pd.DataFrame({"CLEAN": [3.0, 4.0], "CCLE_NAN": [3.0, 4.0], "TCGA_NAN": [np.nan, 5.0]})
+    kept = fs.drop_incomplete_genes(ccle, tcga, ["CLEAN", "CCLE_NAN"])
+    assert kept == ["CLEAN"]
+
+
+def test_drop_incomplete_genes_noop_when_clean():
+    fs = FeatureSynchroniser()
+    ccle = pd.DataFrame({"A": [1.0, 2.0], "B": [3.0, 4.0]})
+    tcga = pd.DataFrame({"A": [5.0, 6.0], "B": [7.0, 8.0]})
+    assert fs.drop_incomplete_genes(ccle, tcga, ["A", "B"]) == ["A", "B"]
+
+
+def test_feature_synchroniser_custom_lineages():
+    fs = FeatureSynchroniser(lineages=["LUSC", "COAD"])
+    assert fs.lineages == ["LUSC", "COAD"]
+    fs_default = FeatureSynchroniser()
+    assert fs_default.lineages == ["LUAD", "BRCA", "SKCM"]
+
+
+def test_sampler_covers_all_lineages_15way():
+    # Every batch must draw each of the 15 lineages from both domains (Day 18
+    # generalises the sampler from a 3-lineage assumption to any config-driven set).
+    fifteen = [
+        "BLCA", "BRCA", "COAD", "GBM", "HNSC", "KIRC", "LGG", "LIHC",
+        "LUAD", "LUSC", "OV", "PAAD", "READ", "SKCM", "STAD",
+    ]
+    lineage_to_idx, _ = build_lineage_maps(fifteen)
+    n_per_lineage_ccle, n_per_lineage_tcga = 6, 20
+    rng = np.random.default_rng(0)
+
+    def _frame(n_per_lineage):
+        rows, labels = [], []
+        for lineage in fifteen:
+            for _ in range(n_per_lineage):
+                rows.append(rng.normal(size=5))
+                labels.append(lineage)
+        df = pd.DataFrame(rows, columns=[f"G{i}" for i in range(5)])
+        df["lineage"] = labels
+        return df
+
+    ccle_ds = CCLEDataset(_frame(n_per_lineage_ccle), lineage_to_idx=lineage_to_idx)
+    tcga_ds = TCGADataset(_frame(n_per_lineage_tcga), lineage_to_idx=lineage_to_idx)
+    sampler = StratifiedContrastiveBatchSampler(ccle_ds, tcga_ds, batch_size=120)
+    assert sampler.per_lineage == 4
+
+    for batch in sampler:
+        ccle_labels = {ccle_ds[i][1] for i in batch["ccle_indices"]}
+        tcga_labels = {tcga_ds[i][1] for i in batch["tcga_indices"]}
+        assert ccle_labels == set(range(15))
+        assert tcga_labels == set(range(15))

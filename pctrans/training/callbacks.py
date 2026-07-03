@@ -31,8 +31,9 @@ def _row_majority(labels_2d):
 class KNNValidationCallback:
     """kNN@k cross-domain retrieval accuracy on validation embeddings."""
 
-    def __init__(self, k=5):
+    def __init__(self, k=5, idx_to_lineage=None):
         self.k = k
+        self.idx_to_lineage = idx_to_lineage if idx_to_lineage is not None else IDX_TO_LINEAGE
 
     @staticmethod
     def _embed(encode_fn, loader):
@@ -64,7 +65,7 @@ class KNNValidationCallback:
         correct = preds == y_ccle
 
         per_lineage = {}
-        for idx, lineage in IDX_TO_LINEAGE.items():
+        for idx, lineage in self.idx_to_lineage.items():
             mask = y_ccle == idx
             if mask.any():
                 per_lineage[lineage] = float(correct[mask].mean())

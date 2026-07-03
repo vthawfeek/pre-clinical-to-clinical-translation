@@ -32,6 +32,30 @@ LINEAGE_ALIASES = {
     "Breast Invasive Cancer, NOS": "BRCA",
     "Breast Ductal Carcinoma In Situ": "BRCA",
     "Breast Neoplasm, NOS": "BRCA",
+    # --- Day 18: 15-lineage expansion. Same primary-disease/subtype fallback
+    # cascade as above; keys are only added where the Oncotree label maps
+    # unambiguously onto a single TCGA project code. Deliberately left OUT:
+    # generic "Renal Cell Carcinoma" (NOS -- could be papillary/chromophobe,
+    # not just KIRC's clear-cell), generic "Colorectal Adenocarcinoma" (NOS --
+    # could be COAD or READ), and "Diffuse Intrinsic Pontine Glioma" (pediatric
+    # brainstem glioma, not represented in the adult TCGA GBM/LGG cohorts).
+    "Lung Squamous Cell Carcinoma": "LUSC",
+    "Colon Adenocarcinoma": "COAD",
+    "Rectal Adenocarcinoma": "READ",
+    "Pancreatic Adenocarcinoma": "PAAD",
+    "Stomach Adenocarcinoma": "STAD",
+    "Tubular Stomach Adenocarcinoma": "STAD",
+    "Diffuse Type Stomach Adenocarcinoma": "STAD",
+    "Hepatocellular Carcinoma": "LIHC",
+    "Renal Clear Cell Carcinoma": "KIRC",
+    "Head and Neck Squamous Cell Carcinoma": "HNSC",
+    "Glioblastoma": "GBM",
+    "Gliosarcoma": "GBM",
+    "Astrocytoma": "LGG",
+    "Anaplastic Astrocytoma": "LGG",
+    "Oligodendroglioma": "LGG",
+    "Ovarian Epithelial Tumor": "OV",
+    "Bladder Urothelial Carcinoma": "BLCA",
 }
 
 

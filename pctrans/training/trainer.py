@@ -32,6 +32,7 @@ class ContrastiveTrainer:
         val_tcga,
         config,
         mlflow_run_name=None,
+        idx_to_lineage=None,
     ):
         self.model = model
         self.loss_fn = loss_fn
@@ -49,7 +50,7 @@ class ContrastiveTrainer:
         self.checkpoint_path = self.config.get("checkpoint_path", "models/best_model.pt")
         eval_batch_size = int(self.config.get("eval_batch_size", 256))
 
-        self.knn_callback = KNNValidationCallback(k=self.knn_k)
+        self.knn_callback = KNNValidationCallback(k=self.knn_k, idx_to_lineage=idx_to_lineage)
         self._val_ccle_loader = DataLoader(val_ccle, batch_size=eval_batch_size, shuffle=False)
         self._val_tcga_loader = DataLoader(val_tcga, batch_size=eval_batch_size, shuffle=False)
 

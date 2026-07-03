@@ -37,18 +37,26 @@ CCLE_ENTREZ_SUFFIX = re.compile(r" \(\d+\)$")
 class FeatureSynchroniser:
     """Loads CCLE/TCGA raw data and reduces both to a shared top-N HVG feature space."""
 
+    def __init__(self, lineages=None):
+        """``lineages`` defaults to the Phase-1 3-lineage set (LUAD/BRCA/SKCM).
+
+        Day 18 passes the 15-lineage list so the same loader/HVG pipeline serves
+        both the reproducible Phase-1 run and the harder-task expansion.
+        """
+        self.lineages = list(lineages) if lineages is not None else list(LINEAGES)
+
     def load_ccle(self, raw_dir) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Load CCLE expression + metadata, filter to LUAD/BRCA/SKCM, strip Entrez IDs.
+        """Load CCLE expression + metadata, filter to `self.lineages`, strip Entrez IDs.
 
         Returns (expr, meta): `expr` is indexed by ModelID with one column per gene
         symbol plus a trailing "lineage" column; `meta` is the filtered Model.csv.
         """
         raw_dir = Path(raw_dir) / "ccle"
         meta = pd.read_csv(raw_dir / CCLE_METADATA_FILENAME)
-        meta = meta.loc[filter_lineages(meta, LINEAGES)].reset_index(drop=True)
+        meta = meta.loc[filter_lineages(meta, self.lineages)].reset_index(drop=True)
 
         lineage = pd.Series(index=meta.index, dtype=object)
-        for code in LINEAGES:
+        for code in self.lineages:
             lineage[filter_lineages(meta, [code])] = code
         meta["lineage"] = lineage
 
@@ -62,7 +70,7 @@ class FeatureSynchroniser:
         return expr, meta
 
     def load_tcga(self, raw_dir) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Load TCGA expression + phenotype, filter to LUAD/BRCA/SKCM.
+        """Load TCGA expression + phenotype, filter to `self.lineages`.
 
         Returns (expr, pheno): `expr` is indexed by TCGA sample ID with one column
         per gene symbol plus a trailing "lineage" column; `pheno` is the filtered
@@ -71,7 +79,7 @@ class FeatureSynchroniser:
         """
         raw_dir = Path(raw_dir) / "tcga"
         pheno = pd.read_csv(raw_dir / TCGA_PHENOTYPE_FILENAME, sep="\t")
-        pheno = pheno.loc[filter_tcga_lineages(pheno, LINEAGES)].reset_index(drop=True)
+        pheno = pheno.loc[filter_tcga_lineages(pheno, self.lineages)].reset_index(drop=True)
 
         expr_path = raw_dir / TCGA_EXPRESSION_FILENAME
         with open(expr_path, encoding="utf-8") as f:
@@ -96,6 +104,20 @@ class FeatureSynchroniser:
     def find_common_genes(self, ccle_genes, tcga_genes) -> list[str]:
         """Set intersection of gene symbols, sorted for reproducibility."""
         return sorted(set(ccle_genes) & set(tcga_genes))
+
+    def drop_incomplete_genes(self, ccle_expr, tcga_expr, genes) -> list[str]:
+        """Exclude genes with any missing value in either domain (Day 18).
+
+        The Xena PANCAN matrix has genuine per-cohort gaps for some genes (a batch-
+        effect-correction artefact, not a bug) -- invisible in the 3-lineage subset
+        but real once more TCGA cohorts are pulled in for the 15-lineage run. A
+        gene with NaNs outside the train slice can still rank high on train-only
+        variance and then silently propagate NaN into val/test tensors, so this
+        filter runs before HVG ranking rather than being caught downstream.
+        """
+        ccle_complete = ccle_expr[genes].notna().all(axis=0)
+        tcga_complete = tcga_expr[genes].notna().all(axis=0)
+        return [g for g in genes if ccle_complete[g] and tcga_complete[g]]
 
     def select_hvgs(
         self, ccle_expr, tcga_expr, common_genes, n_hvgs=2000, train_ids=None

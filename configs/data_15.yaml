@@ -1,0 +1,6 @@
+n_hvgs: 2000
+lineages: [BLCA, BRCA, COAD, GBM, HNSC, KIRC, LGG, LIHC, LUAD, LUSC, OV, PAAD, READ, SKCM, STAD]
+min_samples_per_lineage: 13
+val_frac: 0.15
+test_frac: 0.15
+seed: 42
