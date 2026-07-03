@@ -53,7 +53,8 @@ New source modules
   pctrans/evaluation/stats.py         bootstrap + Wilson CIs, multi-seed aggregation, permutation test
   pctrans/evaluation/baselines.py     Harmony / ComBat / Scanorama + supervised cross-domain classifier
   pctrans/evaluation/confounders.py   tumour-purity confounder analysis (ESTIMATE)
-  pctrans/casestudy/braf_vemurafenib.py   Rung-4 placement + response-link analysis
+  pctrans/evaluation/celligner_compare.py  Celligner head-to-head on identical retrieval metric (Day 25)
+  pctrans/casestudy/braf_vemurafenib.py   Rung-4 placement + response-link + drug-signal probe (Day 26)
 
 New / changed configs
   configs/data.yaml                   lineages -> ~15; LINEAGE_TO_IDX becomes config-driven (dynamic)
@@ -66,8 +67,11 @@ New public data (all unrestricted)
   TCGA ESTIMATE / ABSOLUTE purity     per-patient tumour-purity scores (confounder analysis)
 
 New reports
-  reports/day-15..25-*.md             daily reports
+  reports/day-15..27-*.md             daily reports
   reports/phase2-summary.md           consolidated Gate-2 evidence table
+  reports/celligner_comparison.json   Celligner head-to-head numbers (Day 25)
+  reports/preprint-outline.md         audit/benchmark manuscript skeleton
+  reports/preprint-draft.md           assembled preprint draft (Day 27)
   reports/blog-03-validation.md       "What survives rigorous validation"
 
 Compute: unchanged — CPU / free Colab. Bulk-RNA MLP; ~1 min/train even at 15 lineages. Cost ~$0.
@@ -491,7 +495,7 @@ def test_response_correlation_runs_and_bounds():# rho in [-1,1], CI returned
 
 ---
 
-## Phase 2D — Consolidation (Days 24–25)
+## Phase 2D — Consolidation (Day 24)
 
 ---
 
@@ -518,36 +522,146 @@ project's headline claims to match what actually survived.
 **Verification:** `/gate-check` prints Gate 0, 1, and 2; suite green; all reports present.
 **Daily report:** `reports/day-24-gate2-summary.md`.
 **Commit:** `day 24: Gate 2 evaluation, phase2-summary, README/CLAUDE claims updated`
-**Next up:** Day 25 — tell the story: Blog Post 3.
+**Next up:** Day 25 — the mandatory prior-art benchmark: Celligner head-to-head.
 
 ---
 
-### Day 25: Blog Post 3 — "What Survives Rigorous Validation"
+## Phase 2E — Prior-Art Benchmark & Preprint (Days 25–27)
 
-**Goal:** The content deliverable — the credibility story that turns a clean demo into a mature piece.
+> **Why this phase exists:** Gate 2 (Day 24) makes the work *rigorous*, but a preprint/journal
+> submission needs it *positioned against the incumbent method*. No reviewer will accept a CCLE–TCGA
+> alignment paper that doesn't benchmark against **Celligner** (Warren et al., Nat. Commun. 2021),
+> and the drug-response null (Part B) has to be situated against the drug-transfer SOTA (**CODE-AE**,
+> He et al., Nat. Mach. Intell. 2022). These two days close the single largest gap between
+> "portfolio-ready" and "submittable". See `reports/preprint-outline.md` for the target manuscript.
+
+---
+
+### Day 25: Celligner Head-to-Head Benchmark [SUBMISSION-CRITICAL]
+
+**Goal:** An apples-to-apples comparison of our supervised contrastive aligner against Celligner, the
+incumbent unsupervised CCLE↔TCGA alignment method, on an identical cross-domain retrieval metric.
+
+**Framing (state honestly in the write-up):** Celligner is *unsupervised* and pan-lineage; ours is
+*supervised on lineage*. Supervision makes our retrieval task easier, so a comparable or better
+number is *expected*, not impressive — the honest takeaway is usually "coarse lineage is easy for
+both," which strengthens the audit narrative. If Celligner (using no labels) matches us, that is the
+point, not a threat.
 
 **Tasks:**
 
-1. `/blog-draft 25` → `reports/blog-03-validation.md`:
-   - Title: "I Got 100% Accuracy. Then I Tried to Break It." (working title)
-   - Hook: the honest confession — the Phase-1 metric was already 87% at epoch 1 and the test set was
-     38 cell lines, so a good result *demanded* stress-testing before it could be believed.
-   - Body: the five stress tests and what each showed (CIs & multi-seed; real baselines & supervised
-     ceiling; 15 lineages with biologically sensible confusions; purity confounder ruled out;
-     label-shuffle collapse); then the vemurafenib case study as the first tie to real drug response.
-   - Honesty as the theme: report any null/negative outcomes plainly; name Rungs 3 & 5 as the road
-     not yet travelled; keep the claim at "validated research method," never "clinical".
-   - 1,200–1,500 words.
-2. Draft LinkedIn Post 3 (the "how I tried to falsify my own model" angle) and an X thread outline,
-   each anchored on the before/after credibility arc and one figure (permutation null or the
-   biologically sensible 15-lineage confusion heatmap).
-3. Final full-suite run + push.
+1. Implement `pctrans/evaluation/celligner_compare.py`:
+   - `run_celligner(ccle_expr, tcga_expr) -> np.ndarray` — run Celligner (Python `celligner` package
+     from the Broad; pin the version) on the *same* HVG-filtered CCLE+TCGA matrices used by our model,
+     producing its aligned joint embedding. Guard the import behind the optional `baselines` extra.
+   - `retrieval_on_embedding(joint_emb, ccle_ids, tcga_ids, lineages, k=5)` — compute the **identical**
+     cross-domain kNN@{1,5} + silhouette we use for our model, so the only thing that differs is the
+     alignment method.
+2. Run on both the 3-lineage and 15-lineage test sets. Record Celligner kNN@5, silhouette, and the
+   per-lineage breakdown next to ours and the baselines (Harmony, supervised ceiling).
+3. Fairness controls: same gene set, same test split, same metric, same k. Note where a fully-fair
+   comparison is impossible (Celligner is unsupervised / transductive over all samples) and report the
+   caveat rather than hiding it.
+4. Write `reports/celligner_comparison.json`; render **Figure F7** (Celligner vs contrastive vs
+   Harmony vs ceiling) and populate **Table T3** in the preprint outline.
 
-**Verification:** `uv run ruff check` + `uv run pytest tests/ -q` green; content drafts present.
-**Daily report:** `reports/day-25-blog3.md`.
-**Commit:** `day 25: blog-03 validation story, LinkedIn/X drafts, Phase 2 complete`
-**Next up:** (Optional future) Phase 3 — Rung 3 external cohorts / cross-platform / PDX; or a scoped
-Rung-4 expansion beyond the single vemurafenib case study.
+**Expected outputs (illustrative — record actual):**
+```
+3-lineage kNN@5:   Celligner XX%   |  contrastive 100%  |  Harmony 84.2%  |  ceiling 97.1%
+15-lineage kNN@5:  Celligner XX%   |  contrastive 78.4% |  ...
+Interpretation: does an unsupervised aligner reach comparable lineage retrieval? (usually ~yes)
+```
+
+**Tests to add:**
+```python
+def test_retrieval_on_embedding_matches_our_metric():  # same fn reproduces knn.py on a fixed array
+def test_celligner_compare_skips_without_dep():         # clean skip when celligner not installed
+```
+
+**Verification:** `uv run pytest tests/test_celligner_compare.py -q` (skips if dep absent); suite green.
+**Daily report:** `reports/day-25-celligner-comparison.md` — the head-to-head table + honest read.
+**Commit:** `day 25: Celligner head-to-head benchmark on identical retrieval metric`
+**Next up:** Day 26 — situate the drug-response null against the drug-transfer SOTA (CODE-AE).
+
+---
+
+### Day 26: Drug-Response Transfer Positioning (CODE-AE)
+
+**Goal:** Make the Part B null *interpretable* rather than just negative: show whether the embedding
+even *retains* drug-response-relevant signal, and position the result against CODE-AE, the method
+purpose-built for the task our lineage-aligned embedding failed at.
+
+**Tasks:**
+
+1. Extend `pctrans/casestudy/braf_vemurafenib.py` with a within-domain probe:
+   - `drug_signal_retained(embeddings, raw_expr, vemurafenib_auc)` — cross-validated (within CCLE)
+     prediction of vemurafenib AUC from (a) the 64-d embedding vs (b) raw HVG expression vs (c) BRAF
+     status alone. Reports R²/Spearman for each. This distinguishes two very different explanations of
+     the Part B null: *"alignment discarded drug-response signal"* vs *"the proximity metric was the
+     wrong probe but the signal is still there."*
+2. **CODE-AE positioning (analysis + prose, not a full reimplementation):**
+   - Summarise CODE-AE's approach (deconfounding autoencoder + domain adaptation, drug-supervised) and
+     state plainly why a *lineage-supervised, drug-agnostic* embedding is not expected to transfer drug
+     response — our null is consistent with, and motivates, drug-supervised methods.
+   - If tractable within the day, run a lightweight drug-response transfer baseline (e.g. an
+     ElasticNet trained on CCLE expression→vemurafenib AUC, applied to patient expression as a
+     proximity-free reference) to bracket what a non-alignment approach yields. Mark clearly as a
+     reference point, not a CODE-AE reproduction.
+3. Write `reports/drug_transfer_positioning.json`; add the R²-retained panel to Figure F6; update the
+   Discussion notes in `reports/preprint-outline.md` (§4.7/§5).
+
+**Expected outputs (illustrative):**
+```
+Vemurafenib AUC predictability (within CCLE, CV):
+  from BRAF status alone:  Spearman X.XX
+  from raw HVG expression: Spearman X.XX
+  from 64-d embedding:     Spearman X.XX    ← lower => alignment compressed away drug signal
+Read: is the Part B null a probe problem or an information-loss problem?
+```
+
+**Tests to add:**
+```python
+def test_drug_signal_probe_runs_and_bounds():   # returns finite R²/rho in valid range
+```
+
+**Verification:** `uv run pytest tests/test_casestudy.py -q`; suite green.
+**Daily report:** `reports/day-26-drug-transfer-positioning.md`.
+**Commit:** `day 26: drug-response-transfer probe + CODE-AE positioning`
+**Next up:** Day 27 — assemble the preprint and the blog.
+
+---
+
+### Day 27: Preprint Assembly + Blog Post 3
+
+**Goal:** Turn the Phase-2 evidence + prior-art benchmark into a submittable preprint draft and the
+public-facing credibility story.
+
+**Tasks:**
+
+1. Fill `reports/preprint-outline.md` into a full draft:
+   - Insert the Day-25 Celligner numbers into Results §4.7 and Table T3; render Figure F7.
+   - Insert the Day-26 drug-transfer probe into §4.8/§5 and Figure F6.
+   - Finalise Abstract numbers, Related Work, Methods, Limitations; run the pre-submission checklist.
+   - Export a manuscript-formatted draft (`reports/preprint-draft.md` + figures) ready for bioRxiv/arXiv.
+2. `/blog-draft 27` → `reports/blog-03-validation.md`:
+   - Title: "I Got 100% Accuracy. Then I Tried to Break It." (working title)
+   - Hook: the honest confession — kNN@5 was already ~87% at epoch 1 on a 38-line test set, so a good
+     result *demanded* stress-testing before it could be believed.
+   - Body: the stress tests and what each showed (CIs & multi-seed; real baselines & the 97.1%
+     supervised ceiling; 15 lineages with biologically sensible confusions; purity confounder ruled
+     out; label-shuffle collapse; Celligner head-to-head); then the vemurafenib case study as an
+     honest weak/null tie to drug response.
+   - Theme: report nulls plainly; name Rungs 3 & 5 as the road not travelled; claim stays "research
+     method," never "clinical". 1,200–1,500 words.
+3. Draft LinkedIn Post 3 ("how I tried to falsify my own model") + X thread outline, each anchored on
+   the before/after credibility arc and one figure (permutation null or the 15-lineage confusion
+   heatmap). Final full-suite run + push.
+
+**Verification:** `uv run ruff check` + `uv run pytest tests/ -q` green; preprint draft + content present.
+**Daily report:** `reports/day-27-preprint-blog.md`.
+**Commit:** `day 27: preprint draft assembled, blog-03 validation story, Phase 2 complete`
+**Next up:** (Optional future) Phase 3 — Rung 3 external cohorts / cross-platform / PDX / single-cell;
+systematic (not single-case) drug-response transfer; then, only with collaborators, the Rung-5 path.
 
 ---
 
@@ -555,10 +669,11 @@ Rung-4 expansion beyond the single vemurafenib case study.
 
 | Item | Phase 2 (Days 15–25) |
 |---|---|
-| Calendar | ~11 working days, solo, part-time (same `/day N` cadence as Phase 1) |
+| Calendar | ~14 working days (Days 15–27), solo, part-time (same `/day N` cadence as Phase 1) |
 | Compute | CPU / free Colab; bulk-RNA MLP, ~1 min/train even at 15 lineages |
-| Cost | ~$0 — all data public/unrestricted (CCLE, TCGA, DepMap PRISM/GDSC, MC3, ESTIMATE) |
-| New deps | `harmonypy`, `scanorama`, `inmoose` (optional extra), `statsmodels` (Wilson/bootstrap) |
-| Risk | Rung-4 case study may return a null — that is a legitimate, reportable outcome |
+| Cost | ~$0 for the work — all data public/unrestricted (CCLE, TCGA, DepMap PRISM/GDSC, MC3, ESTIMATE) |
+| Publication cost | preprint free (bioRxiv/arXiv); soundness-journal APC ~$1.2–1.8k (PLOS ONE / PeerJ), waivers exist; workshops free |
+| New deps | `harmonypy`, `scanorama`, `inmoose`, `celligner` (optional `baselines` extra), `statsmodels` (Wilson/bootstrap) |
+| Risk | Rung-4 case study returned a null (Part B) — legitimate, reported; Celligner may match us (that is the point) |
 | Out of scope | Rung 3 (external/cross-platform/PDX/single-cell), Rung 5 (prospective/clinical/regulatory) |
 ```

@@ -630,3 +630,63 @@ def permutation_null_panel(results, chance_level=None, title="Label-shuffle nega
     fig.suptitle(title)
     fig.tight_layout()
     return fig
+
+
+def celligner_comparison_panel(results, title="Day 25 — Celligner head-to-head"):
+    """Figure F7: one grouped bar chart per variant in `celligner_compare`'s output.
+
+    ``results`` is the `reports/celligner_comparison.json` dict (one entry per
+    ``"3-lineage"``/``"15-lineage"`` variant). Each subplot bars every method
+    with a real number (random / PCA / Harmony / Celligner / supervised
+    ceiling / contrastive), skipping any entry that is ``None`` (e.g.
+    Celligner when the dependency is not installed) rather than plotting a
+    fabricated zero.
+    """
+    import matplotlib.pyplot as plt
+
+    _METHOD_LABELS = {
+        "random": "Random",
+        "pca_knn": "PCA+kNN",
+        "harmony_knn": "Harmony",
+        "celligner_knn5": "Celligner",
+        "supervised_ceiling": "Supervised\nceiling",
+        "contrastive_knn5": "Contrastive\n(ours)",
+    }
+    _METHOD_COLORS = {
+        "random": "#7f7f7f",
+        "pca_knn": "#aec7e8",
+        "harmony_knn": "#ff7f0e",
+        "celligner_knn5": "#9467bd",
+        "supervised_ceiling": "#2ca02c",
+        "contrastive_knn5": "#d62728",
+    }
+
+    n = len(results)
+    fig, axes = plt.subplots(1, n, figsize=(5 * n, 4.5), squeeze=False)
+    axes = axes[0]
+
+    for ax, (name, res) in zip(axes, results.items()):
+        values = dict(res.get("reference", {}))
+        values["celligner_knn5"] = res.get("celligner_knn5")
+        values["contrastive_knn5"] = res.get("contrastive_knn5")
+
+        methods = [m for m in _METHOD_LABELS if values.get(m) is not None]
+        heights = [values[m] * 100 for m in methods]
+        colors = [_METHOD_COLORS[m] for m in methods]
+        labels = [_METHOD_LABELS[m] for m in methods]
+
+        bars = ax.bar(labels, heights, color=colors, edgecolor="white")
+        for bar, h in zip(bars, heights):
+            ax.text(bar.get_x() + bar.get_width() / 2, h + 1, f"{h:.1f}%",
+                    ha="center", va="bottom", fontsize=9)
+        if not res.get("celligner_available", True):
+            ax.text(0.5, 0.5, "Celligner: dep not installed", transform=ax.transAxes,
+                    ha="center", va="center", fontsize=8, color="#9467bd", style="italic")
+
+        ax.set_ylabel("kNN@5 retrieval accuracy (%)")
+        ax.set_ylim(0, 108)
+        ax.set_title(f"{name} (n={res['n_lineages']} lineages)")
+
+    fig.suptitle(title)
+    fig.tight_layout()
+    return fig

@@ -1,0 +1,46 @@
+{
+  "3-lineage": {
+    "n_lineages": 3,
+    "test_sizes": {
+      "ccle": 38,
+      "tcga": 339
+    },
+    "celligner_knn5": null,
+    "celligner_silhouette": null,
+    "celligner_per_lineage": null,
+    "celligner_available": false,
+    "contrastive_knn5": 1.0,
+    "contrastive_wilson_ci": {
+      "low": 0.908190131774416,
+      "high": 0.9999999999999999,
+      "n": 38
+    },
+    "reference": {
+      "random": 0.3333333333333333,
+      "pca_knn": 0.6578947368421053,
+      "harmony_knn": 0.8421052631578947,
+      "supervised_ceiling": 0.9705014749262537
+    }
+  },
+  "15-lineage": {
+    "n_lineages": 15,
+    "test_sizes": {
+      "ccle": 111,
+      "tcga": 1070
+    },
+    "celligner_knn5": null,
+    "celligner_silhouette": null,
+    "celligner_per_lineage": null,
+    "celligner_available": false,
+    "contrastive_knn5": 0.7837837837837838,
+    "contrastive_wilson_ci": {
+      "low": 0.6984044920003546,
+      "high": 0.8501778810115038,
+      "n": 111
+    },
+    "reference": {
+      "random": 0.06666666666666667,
+      "pca_knn": 0.25225225225225223
+    }
+  }
+}

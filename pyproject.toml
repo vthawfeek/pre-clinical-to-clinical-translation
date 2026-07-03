@@ -39,6 +39,15 @@ dev = [
 # `scanorama` (via `annoy`) and `inmoose` ship no prebuilt wheels and need a
 # C/C++ toolchain to build from source -- not available on every machine (this
 # project's Windows dev box included). Works out of the box on Colab/Linux.
+#
+# `celligner` (Day 25 head-to-head, `pctrans/evaluation/celligner_compare.py`)
+# is deliberately NOT listed here: its published PyPI release (1.1.0) declares
+# a dependency on a package literally named `umap` (not `umap-learn`), which
+# has no installable release on PyPI at all, so adding it would make this
+# whole extra unresolvable by pip/uv on every platform, not just this dev box.
+# It also requires R plus a bundled `mnnpy` build with no prebuilt wheel.
+# Install it manually from GitHub source (see the Celligner README) if you
+# need a real number; `run_celligner` returns `None` otherwise.
 baselines = [
     "harmonypy>=0.0.9,<2.0",
     "scanorama>=1.7.3",
@@ -59,6 +68,7 @@ pctrans-confounders = "pctrans.scripts.confounders:app"
 pctrans-permutation-test = "pctrans.scripts.permutation_test:app"
 pctrans-casestudy  = "pctrans.scripts.casestudy:app"
 pctrans-casestudy-analysis = "pctrans.scripts.casestudy_analysis:app"
+pctrans-celligner-compare = "pctrans.scripts.celligner_compare:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pctrans"]
