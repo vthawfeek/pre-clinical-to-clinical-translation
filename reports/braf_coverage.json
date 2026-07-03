@@ -1,0 +1,17 @@
+{
+  "n_cell_lines": 61,
+  "n_patients": 65,
+  "n_cell_lines_with_vemurafenib": 41,
+  "cell_line_braf_split": {
+    "mutant": 47,
+    "WT": 14
+  },
+  "patient_braf_split": {
+    "WT": 33,
+    "mutant": 32
+  },
+  "cell_line_with_vemurafenib_braf_split": {
+    "mutant": 33,
+    "WT": 8
+  }
+}
