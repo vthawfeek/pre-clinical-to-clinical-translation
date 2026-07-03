@@ -13,7 +13,7 @@ and Days 15–25 to `PLAN-phase2.md`.
 Each invocation executes all tasks for that day from the active plan file, runs lint and tests,
 writes `reports/day-N-<topic>.md`, commits, and pushes to GitHub. On blog-milestone days (7, 12, 25)
 it also drafts blog/LinkedIn/X content via `/blog-draft N`. Run `/gate-check` any time to re-print
-the Gate 0/1 (and, once Day 24 lands, Gate 2) evaluation decision.
+the Gate 0, 1, and 2 evaluation decisions.
 
 ## Current status
 
@@ -43,7 +43,7 @@ the Gate 0/1 (and, once Day 24 lands, Gate 2) evaluation decision.
 - Day 21: COMPLETE — `permutation_test()` (generic empirical p-value + null distribution) in `pctrans/evaluation/stats.py`, `permutation_null_panel` viz, `pctrans-permutation-test` CLI (eval-only label-shuffle + retrain-based label-shuffle variants); real 15-lineage run (100 perms x 5-epoch short retrain): null mean 7.0–7.7% (chance 6.7%), max 17–20%, real kNN@5 78.4% never approached, p = 0.0099 on both variants (target p<0.01 met) — Gate 2 negative-control criterion PASS
 - Day 22: COMPLETE — `pctrans/casestudy/braf_vemurafenib.py` (PrismClient for DepMap PRISM Repurposing 20Q2 vemurafenib AUC, CBioPortalClient for BRAF calls, `assemble_braf_table`), `pctrans-casestudy` CLI → `data/processed/braf_vemurafenib.parquet` + `reports/braf_coverage.json`; real numbers: 61 SKCM cell lines with BRAF status (47 mutant/14 WT) via cBioPortal `ccle_broad_2019`, 41 of those also have a PRISM vemurafenib AUC (33 mutant/8 WT); 65 SKCM test patients with BRAF status via `skcm_tcga_pan_can_atlas_2018` (32 mutant/33 WT); classic CCLE/GDSC panels only tested vemurafenib's precursor PLX4720, not vemurafenib itself — PRISM Repurposing was the real source
 - Day 23: COMPLETE — Part A/B placement + response-link analysis in `pctrans/casestudy/braf_vemurafenib.py` (`braf_placement_test`, `braf_response_link`), `braf_casestudy_panel`/`_interactive` viz, `pctrans-casestudy-analysis` CLI → `reports/braf_casestudy.json` + `reports/braf_vemurafenib.{png,html}`, `03_evaluation.ipynb` Section 7; real result: Part A weak positive (BRAF-mutant SKCM lines closer to BRAF-mutant patient centroid, Mann-Whitney p=0.047, effect 0.649, 95% CI [0.465, 0.834]), Part B null (Spearman rho=0.209, 95% CI [-0.109, 0.493], p=0.19, n=41) — reported honestly, not buried
-- Day 24: PENDING — Gate 2 evaluation, phase2-summary, README/CLAUDE claims updated
+- Day 24: COMPLETE — Gate 2 extended into `/gate-check` (`.claude/commands/gate-check.md`), `reports/phase2-summary.md` (evidence table: rung → claim → experiment → number+CI → verdict), README/CLAUDE headline claims hardened (bare "100%" → "100% (95% CI 90.8–100%, n=38); stable across 10 seeds; beats Harmony/ComBat/Scanorama; survives label-shuffle (p<.01) and purity adjustment"), README "Limitations & Scope" section added (Rungs 3/5 out of scope, research method not clinical tool); Gate 2 decision: **PORTFOLIO-READY** — G2-1 through G2-4 all PASS (multi-seed CI lower bound 0.932 ≥ 0.90; beats Harmony by +15.8pts and exceeds supervised ceiling; permutation p=0.0099; purity strata both 100% kNN@5), G2-5 reports the expected 15-lineage headroom (78.4%) with biologically sensible confusions, G2-BONUS reports the vemurafenib case study honestly (Part A weak positive, Part B null)
 - Day 25: PENDING — blog-03 validation story, LinkedIn/X drafts, Phase 2 complete
 
 ## Project
@@ -65,6 +65,9 @@ Batch:     B=48 pairs: 16 LUAD + 16 BRCA + 16 SKCM (SupCon: all same-lineage cro
 Training:  30 epochs, Adam lr=3e-4, cosine LR schedule, Colab T4 (~3 min) or CPU (~12 min)
 Gate:      Day 10 kNN@5 Retrieval Accuracy ≥ 70% → DEPLOY; < 70% → DEBUG PROTOCOL
 Baselines: Random 33.3%, PCA+kNN 65.8%, Harmony 84.2% (real, Day 17), ours 100% (Wilson CI 90.8–100%)
+Gate 2:    PORTFOLIO-READY (Day 24) — stable across 10 seeds (0.950±0.034, CI [0.932,0.971]),
+           beats Harmony by +15.8pts, survives label-shuffle (p=0.0099) and purity adjustment,
+           15-lineage 78.4% with sensible confusions, vemurafenib case study weak+null (honest)
 ```
 
 ## Tech stack

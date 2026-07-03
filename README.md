@@ -33,9 +33,9 @@ cell-line ↔ tumour domain gap, over LUAD, BRCA, and SKCM.
 Held-out test split; the model never saw these samples during training or
 checkpoint selection.
 
-| Metric | Random | PCA + kNN | Harmony (lit.) | **This Work** |
+| Metric | Random | PCA + kNN | Harmony (real, harmonypy) | **This Work** |
 |---|---|---|---|---|
-| kNN@5 Accuracy | 33.3 % | 65.8 % | ~63 % | **100 %** |
+| kNN@5 Accuracy | 33.3 % | 65.8 % | 84.2 % | **100 %** (95% CI 90.8–100 %, n=38) |
 | kNN@1 Accuracy | 33.3 % | — | — | **97.4 %** |
 | Silhouette Score | — | — | — | **+0.57** |
 | TFS (composite) | — | — | — | **0.89** |
@@ -44,6 +44,23 @@ checkpoint selection.
 for LUAD, BRCA, and SKCM. The single hardest cell line is `ACH-000264` (Calu-6, an
 anaplastic NSCLC line), TFS 0.662. Full breakdown in
 [docs/05_evaluation.md](docs/05_evaluation.md).
+
+**This result has since been stress-tested (Phase 2, Days 15–24 — see
+[reports/phase2-summary.md](reports/phase2-summary.md)).** The headline claim is:
+**100 % kNN@5 (95 % CI 90.8–100 %, n=38); stable across 10 seeds (0.950 ± 0.034,
+CI [0.932, 0.971]); beats the best real batch-correction baseline (Harmony 84.2 %)
+by +15.8 pts; survives a label-shuffle negative control (p = 0.0099) and a
+tumour-purity confounder check (100 % kNN@5 in both purity strata).**
+
+Extending to a harder **15-lineage** task gives genuine headroom — kNN@5 **78.4 %**
+(Wilson CI 69.8–85.0 %, n=111) — with errors concentrated on biologically
+confusable pairs (LUAD↔LUSC, GBM↔LGG, COAD↔READ absorb 45.8 % of off-diagonal
+error mass, a 12× enrichment), not scattered randomly. A first case study tying the
+embedding to a real drug-response phenotype (BRAF-mutant melanoma / vemurafenib)
+found a **weak positive** placement effect (p = 0.047, effect 0.649, CI
+[0.465, 0.834]) but a **null** link to vemurafenib sensitivity itself (Spearman
+rho = 0.209, CI [−0.109, 0.493], p = 0.19, n=41) — reported honestly rather than
+rounded up.
 
 ## Quick Start
 
@@ -116,6 +133,23 @@ TCGA patients on a live UMAP, its TFS gauge, and its nearest-patient table.
   frozen for val / test / inference (see docs/02).
 - **Honesty:** every reported number is on the held-out test split; UMAP is used for
   visualisation only, never for a metric.
+
+## Limitations & Scope
+
+This is a **validated research method, not a clinical tool**. What Phase 2 checked and what it
+deliberately did not:
+
+- **Validated:** statistical stability across 10 random splits, a real batch-correction baseline
+  (Harmony) beaten by a wide margin, generalisation to 15 lineages with biologically sensible
+  failure modes, robustness to a tumour-purity confounder, and a label-shuffle negative control.
+  See [reports/phase2-summary.md](reports/phase2-summary.md) for the full evidence table.
+- **Out of scope, named so it isn't mistaken for "done":** external cohorts, cross-platform assays
+  (microarray/other RNA-seq platforms), patient-derived xenografts, and single-cell data (all
+  public bulk RNA-seq here) — and any prospective, pre-registered clinical validation or
+  regulatory (SaMD / biomarker) qualification, which is a multi-year, multi-institution effort,
+  not an individual-repo extension.
+- **The vemurafenib/BRAF case study is a first, partial tie to real biology, not proof of clinical
+  utility** — a weak placement effect and a null response-correlation at n=41, reported as such.
 
 ## Licence
 
