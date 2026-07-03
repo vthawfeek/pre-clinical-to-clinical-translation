@@ -39,6 +39,16 @@ link needs three real-world sources:
 ``CBioPortalClient`` mirrors this project's existing download-client
 convention (``CCLEClient``/``TCGAClient``): each method caches one JSON
 response under ``out_dir`` and skips re-fetching unless ``force=True``.
+
+Day 26 adds `drug_signal_retained`: a within-CCLE cross-validated probe of
+whether the *embedding itself* still carries vemurafenib-response signal.
+This separates two very different readings of the Day-23 Part-B null --
+"alignment discarded drug-response information" (embedding R^2/rho far below
+raw expression) vs. "the proximity-to-centroid probe was the wrong tool but
+the signal survives in the space" (embedding R^2/rho comparable to raw
+expression) -- and brackets both against CODE-AE, the drug-supervised method
+purpose-built for this transfer task (see `reports/preprint-outline.md`
+Sec 4.8/5 for the positioning write-up; no CODE-AE code is reproduced here).
 """
 
 import json
@@ -49,6 +59,10 @@ import numpy as np
 import pandas as pd
 import requests
 from scipy.stats import mannwhitneyu, spearmanr
+from sklearn.linear_model import RidgeCV
+from sklearn.metrics import r2_score
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
 CBIOPORTAL_API = "https://www.cbioportal.org/api"
@@ -478,3 +492,74 @@ def braf_response_link(
     result["n_mutant"] = int((np.asarray(cell_line_status)[mask] == "mutant").sum())
     result["n_wt"] = int((np.asarray(cell_line_status)[mask] == "WT").sum())
     return result
+
+
+# --------------------------------------------------------------------------
+# Day 26 -- is drug-response signal even retained by the embedding, and how
+# does that bracket against a drug-supervised method (CODE-AE)?
+# --------------------------------------------------------------------------
+
+
+def _cv_r2_spearman(X, y, n_splits=5, seed=0):
+    """Out-of-fold R^2 + Spearman rho for a ridge model, standardised per fold.
+
+    Ridge (not ElasticNet) so this holds up when a feature block is
+    high-dimensional relative to n (2,000-gene raw expression on ~40 lines) --
+    no per-fold hyperparameter search beyond the built-in ``RidgeCV`` alpha
+    sweep, which is cheap and avoids convergence issues at this sample size.
+    A one-feature block (BRAF status) degrades gracefully to plain ridge
+    regression on that single indicator.
+    """
+    X = np.asarray(X, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    n = y.size
+    n_splits = min(n_splits, n)
+    if n_splits < 2:
+        raise ValueError("Need at least 2 samples to run cross-validated R^2/Spearman.")
+
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    preds = np.empty(n, dtype=np.float64)
+    for train_idx, test_idx in kf.split(X):
+        scaler = StandardScaler().fit(X[train_idx])
+        x_train = scaler.transform(X[train_idx])
+        x_test = scaler.transform(X[test_idx])
+        model = RidgeCV(alphas=np.logspace(-2, 4, 25))
+        model.fit(x_train, y[train_idx])
+        preds[test_idx] = model.predict(x_test)
+
+    r2 = float(r2_score(y, preds))
+    if np.std(preds) > 0:
+        rho, p_value = spearmanr(y, preds)
+        rho = float(rho) if np.isfinite(rho) else 0.0
+        p_value = float(p_value) if np.isfinite(p_value) else 1.0
+    else:
+        rho, p_value = 0.0, 1.0
+    return {"r2": r2, "rho": rho, "p_value": p_value, "n": int(n), "n_splits": n_splits}
+
+
+def drug_signal_retained(embeddings, raw_expr, braf_status, vemurafenib_auc, n_splits=5, seed=0):
+    """Within-CCLE cross-validated vemurafenib-AUC predictability from three feature blocks.
+
+    Compares (a) BRAF status alone (a single binary indicator -- the floor a
+    naive driver-only rule would reach), (b) raw HVG expression (2,000-d --
+    the information available before any alignment), and (c) the 64-d
+    contrastive embedding (the information that *survives* alignment), all
+    scored by identical out-of-fold R^2 and Spearman rho on the same CV
+    folds. If (c) tracks (b), the Day-23 Part-B null is a probe-choice
+    problem (proximity-to-centroid was the wrong readout); if (c) collapses
+    toward (a) while (b) does not, alignment itself discarded drug-response
+    signal beyond the driver mutation.
+    """
+    embeddings = np.asarray(embeddings, dtype=np.float64)
+    raw_expr = np.asarray(raw_expr, dtype=np.float64)
+    auc = np.asarray(vemurafenib_auc, dtype=np.float64)
+    braf_feature = (np.asarray(braf_status) == "mutant").astype(np.float64).reshape(-1, 1)
+
+    if not (embeddings.shape[0] == raw_expr.shape[0] == braf_feature.shape[0] == auc.size):
+        raise ValueError("embeddings, raw_expr, braf_status, and vemurafenib_auc must share n rows.")
+
+    return {
+        "braf_status": _cv_r2_spearman(braf_feature, auc, n_splits=n_splits, seed=seed),
+        "raw_expression": _cv_r2_spearman(raw_expr, auc, n_splits=n_splits, seed=seed),
+        "embedding": _cv_r2_spearman(embeddings, auc, n_splits=n_splits, seed=seed),
+    }

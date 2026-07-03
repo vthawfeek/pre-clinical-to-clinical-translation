@@ -1,4 +1,4 @@
-"""``pctrans-casestudy-analysis`` CLI: Day 23 placement + response-link analysis.
+"""``pctrans-casestudy-analysis`` CLI: Day 23 placement/response-link + Day 26 drug-signal probe.
 
 Loads the Day 22 assembled table (`data/processed/braf_vemurafenib.parquet`)
 and runs the two-part Rung-4 hypothesis test:
@@ -12,9 +12,20 @@ and runs the two-part Rung-4 hypothesis test:
 
 Writes `reports/braf_casestudy.json` and the case-study figure pair
 `reports/braf_vemurafenib.png` / `reports/braf_vemurafenib.html`.
+
+Day 26 adds a third question on the same cell lines: does the *embedding*
+still carry drug-response signal at all? `drug_signal_retained` (within-CCLE
+CV) brackets the 64-d embedding against raw HVG expression and BRAF status
+alone, distinguishing "alignment discarded drug-response signal" from "the
+proximity probe was the wrong readout." A lightweight, unvalidated ElasticNet
+CCLE-to-patient reference (no ground-truth patient AUC exists to score it
+against) is also reported as a descriptive bracket, not a CODE-AE
+reproduction. Writes `reports/drug_transfer_positioning.json` and adds a
+third panel to Figure F6.
 """
 
 import json
+import warnings
 from pathlib import Path
 
 import matplotlib
@@ -29,6 +40,7 @@ from pctrans.casestudy.braf_vemurafenib import (  # noqa: E402
     braf_placement_test,
     braf_response_link,
     distance_to_centroid,
+    drug_signal_retained,
 )
 from pctrans.evaluation.viz import (  # noqa: E402
     braf_casestudy_panel,
@@ -39,16 +51,52 @@ from pctrans.evaluation.viz import (  # noqa: E402
 app = typer.Typer()
 
 
+def _ccle_to_patient_reference(cell_line_raw_expr, cell_line_auc, patient_raw_expr, seed=42):
+    """Descriptive-only reference: ElasticNet(CCLE expr -> AUC) applied to patient expr.
+
+    No ground-truth vemurafenib AUC exists for TCGA patients, so this cannot
+    be scored -- it only reports the predicted-AUC distribution against the
+    training range, as a proximity-free bracket for the Part-B null (Day 26
+    task 2's optional, lightweight non-alignment reference; not a CODE-AE
+    reproduction).
+    """
+    from sklearn.linear_model import ElasticNetCV
+    from sklearn.preprocessing import StandardScaler
+
+    scaler = StandardScaler().fit(cell_line_raw_expr)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        model = ElasticNetCV(l1_ratio=[0.1, 0.5, 0.9], alphas=50, max_iter=5000, random_state=seed)
+        model.fit(scaler.transform(cell_line_raw_expr), cell_line_auc)
+    predicted = model.predict(scaler.transform(patient_raw_expr))
+    return {
+        "n_train_cell_lines": int(cell_line_auc.size),
+        "n_patients": int(predicted.size),
+        "n_nonzero_coefs": int(np.count_nonzero(model.coef_)),
+        "train_auc_min": float(cell_line_auc.min()),
+        "train_auc_max": float(cell_line_auc.max()),
+        "predicted_patient_auc_mean": float(predicted.mean()),
+        "predicted_patient_auc_std": float(predicted.std()),
+        "predicted_patient_auc_min": float(predicted.min()),
+        "predicted_patient_auc_max": float(predicted.max()),
+        "note": "Descriptive reference only -- no ground-truth patient AUC exists to validate against.",
+    }
+
+
 @app.command()
 def main(
     table: str = "data/processed/braf_vemurafenib.parquet",
     output: str = "reports/braf_casestudy.json",
     figure_png: str = "reports/braf_vemurafenib.png",
     figure_html: str = "reports/braf_vemurafenib.html",
+    ccle_raw_expr: str = "data/processed/ccle_2k.parquet",
+    tcga_raw_expr: str = "data/processed/tcga_2k.parquet",
+    drug_transfer_output: str = "reports/drug_transfer_positioning.json",
     n_boot: int = 2000,
+    n_splits: int = 5,
     seed: int = 42,
 ):
-    """Run the Day 23 BRAF placement + vemurafenib response-link analysis."""
+    """Run the Day 23 BRAF placement/response-link + Day 26 drug-signal-retained analysis."""
     df = pd.read_parquet(table)
     cell_lines = df[df["domain"] == "cell_line"].reset_index(drop=True)
     patients = df[df["domain"] == "patient"].reset_index(drop=True)
@@ -93,6 +141,46 @@ def main(
     )
     typer.echo(bar)
 
+    # -- Day 26: is drug-response signal even retained by the embedding? ---
+    ccle_raw_df = pd.read_parquet(ccle_raw_expr)
+    gene_cols = [c for c in ccle_raw_df.columns if c != "lineage"]
+    cell_line_raw_expr = ccle_raw_df.loc[with_auc["sample_id"], gene_cols].to_numpy()
+
+    probe = drug_signal_retained(
+        np.stack(with_auc["embedding"].to_numpy()), cell_line_raw_expr,
+        with_auc["BRAF_status"].to_numpy(), with_auc["vemurafenib_auc"].to_numpy(),
+        n_splits=n_splits, seed=seed,
+    )
+
+    tcga_raw_df = pd.read_parquet(tcga_raw_expr)
+    patient_raw_expr = tcga_raw_df.loc[patients["sample_id"], gene_cols].to_numpy()
+    reference = _ccle_to_patient_reference(
+        cell_line_raw_expr, with_auc["vemurafenib_auc"].to_numpy(), patient_raw_expr, seed=seed,
+    )
+
+    bar26 = "=" * 60
+    typer.echo("")
+    typer.echo(bar26)
+    typer.echo("   DAY 26 -- DRUG-SIGNAL RETAINED (within-CCLE CV, n={})".format(probe["embedding"]["n"]))
+    typer.echo(bar26)
+    for name, label in (
+        ("braf_status", "BRAF status alone"),
+        ("raw_expression", "raw HVG expression"),
+        ("embedding", "64-d embedding"),
+    ):
+        block = probe[name]
+        typer.echo(
+            f"  {label:<20} R^2={block['r2']:+.3f}  rho={block['rho']:+.3f}  p={block['p_value']:.3g}"
+        )
+    typer.echo(
+        f"  CCLE-to-patient ElasticNet reference: predicted patient AUC "
+        f"{reference['predicted_patient_auc_mean']:.3f} +/- {reference['predicted_patient_auc_std']:.3f} "
+        f"(range [{reference['predicted_patient_auc_min']:.3f}, {reference['predicted_patient_auc_max']:.3f}]); "
+        f"training range [{reference['train_auc_min']:.3f}, {reference['train_auc_max']:.3f}] "
+        f"-- descriptive only, no ground truth"
+    )
+    typer.echo(bar26)
+
     # -- Figures ---------------------------------------------------------
     pooled_embeddings = np.concatenate([cell_line_embeddings, patient_embeddings], axis=0)
     pooled_status = np.concatenate([cell_lines["BRAF_status"].to_numpy(), patients["BRAF_status"].to_numpy()])
@@ -108,6 +196,7 @@ def main(
 
     static_fig = braf_casestudy_panel(
         coords, pooled_status, pooled_domain, proximity, auc, response_status, placement, response,
+        drug_signal_result=probe,
     )
     png_path = Path(figure_png)
     png_path.parent.mkdir(parents=True, exist_ok=True)
@@ -128,6 +217,19 @@ def main(
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
     typer.echo(f"Wrote {out_path}")
+
+    drug_transfer_summary = {
+        "table": str(table),
+        "n_cell_lines_with_auc": probe["embedding"]["n"],
+        "drug_signal_retained": probe,
+        "ccle_to_patient_reference": reference,
+    }
+    drug_transfer_path = Path(drug_transfer_output)
+    drug_transfer_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(drug_transfer_path, "w", encoding="utf-8") as f:
+        json.dump(drug_transfer_summary, f, indent=2)
+    typer.echo(f"Wrote {drug_transfer_path}")
+
     return summary
 
 

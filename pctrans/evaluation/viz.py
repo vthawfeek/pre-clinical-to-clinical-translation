@@ -459,20 +459,27 @@ def braf_casestudy_panel(
     response_status,
     placement_result,
     response_result,
+    drug_signal_result=None,
     title="BRAF / vemurafenib case study (Day 23)",
 ):
-    """Static matplotlib two-panel figure for the Day 23 case study.
+    """Static matplotlib figure for the Day 23 (+ Day 26) case study.
 
     Left: 2-D projection of the pooled SKCM cell-line + patient embeddings,
     coloured by BRAF status (mutant red / WT blue), marker = domain (cell
     line cross / patient circle) -- the Part-A placement question made
-    visible. Right: cell-line proximity to the BRAF-mutant-patient centroid
+    visible. Middle: cell-line proximity to the BRAF-mutant-patient centroid
     vs. vemurafenib AUC, coloured by BRAF status, with an OLS fit + bootstrap
-    CI band -- the Part-B response-link question.
+    CI band -- the Part-B response-link question. Right (only when
+    ``drug_signal_result`` -- the Day 26 `drug_signal_retained` output -- is
+    given): out-of-fold R^2 for predicting vemurafenib AUC from BRAF status
+    alone vs. raw HVG expression vs. the 64-d embedding, so a reader can see
+    at a glance whether alignment discarded drug-response signal or the
+    Part-B proximity probe was simply the wrong readout.
     """
     import matplotlib.pyplot as plt
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    n_panels = 3 if drug_signal_result is not None else 2
+    fig, axes = plt.subplots(1, n_panels, figsize=(7 * n_panels, 6))
 
     coords = np.asarray(coords)
     status = np.asarray(braf_status).astype(str)
@@ -524,6 +531,22 @@ def braf_casestudy_panel(
     axes[1].set_xlabel("Proximity to BRAF-mutant-patient centroid (−distance)")
     axes[1].set_ylabel("Vemurafenib AUC (lower = more sensitive)")
     axes[1].legend(fontsize=8, framealpha=0.9)
+
+    if drug_signal_result is not None:
+        blocks = ["braf_status", "raw_expression", "embedding"]
+        labels = ["BRAF status\nalone", "raw HVG\nexpression", "64-d\nembedding"]
+        r2 = [drug_signal_result[b]["r2"] for b in blocks]
+        rho = [drug_signal_result[b]["rho"] for b in blocks]
+        x = np.arange(len(blocks))
+        width = 0.35
+        axes[2].bar(x - width / 2, r2, width, color="#4c72b0", label="R²")
+        axes[2].bar(x + width / 2, rho, width, color="#dd8452", label="Spearman ρ")
+        axes[2].axhline(0.0, color="black", linewidth=0.8)
+        axes[2].set_xticks(x)
+        axes[2].set_xticklabels(labels, fontsize=9)
+        axes[2].set_title("Drug-signal retained (Day 26, within-CCLE CV)")
+        axes[2].set_ylabel("Out-of-fold score")
+        axes[2].legend(fontsize=8, framealpha=0.9)
 
     fig.suptitle(title)
     fig.tight_layout()

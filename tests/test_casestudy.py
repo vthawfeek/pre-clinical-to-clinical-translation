@@ -14,6 +14,7 @@ from pctrans.casestudy.braf_vemurafenib import (
     classify_braf_status,
     coverage_summary,
     distance_to_centroid,
+    drug_signal_retained,
     is_braf_v600,
     load_ccle_depmap_id_map,
     load_vemurafenib_sensitivity,
@@ -255,3 +256,38 @@ def test_response_correlation_runs_and_bounds():
     assert link["n"] == 4
     assert link["n_mutant"] == 2
     assert link["n_wt"] == 2
+
+
+def test_drug_signal_probe_runs_and_bounds():
+    rng = np.random.default_rng(0)
+    n = 24
+    embeddings = rng.normal(size=(n, 6))
+    raw_expr = rng.normal(size=(n, 30))
+    braf_status = np.array(["mutant"] * 16 + ["WT"] * 8)
+    # AUC driven by the embedding's first column (+ noise) so the embedding
+    # arm should recover real signal while raw_expr/BRAF-alone are near-chance.
+    auc = 0.5 - 0.3 * embeddings[:, 0] + rng.normal(0, 0.05, size=n)
+
+    result = drug_signal_retained(embeddings, raw_expr, braf_status, auc, n_splits=4, seed=1)
+
+    assert set(result) == {"braf_status", "raw_expression", "embedding"}
+    for block in result.values():
+        assert set(block) == {"r2", "rho", "p_value", "n", "n_splits"}
+        assert -1.0 <= block["rho"] <= 1.0
+        assert np.isfinite(block["r2"])
+        assert block["n"] == n
+        assert block["n_splits"] == 4
+
+    # The embedding arm carries the planted signal; it should recover strong,
+    # near-perfect out-of-fold correlation with the (near-noiseless) target.
+    assert result["embedding"]["rho"] > 0.8
+    assert result["embedding"]["r2"] > 0.5
+
+
+def test_drug_signal_probe_requires_matching_row_counts():
+    embeddings = np.zeros((5, 4))
+    raw_expr = np.zeros((5, 10))
+    braf_status = np.array(["mutant"] * 5)
+    auc = np.zeros(4)  # mismatched length
+    with pytest.raises(ValueError):
+        drug_signal_retained(embeddings, raw_expr, braf_status, auc)

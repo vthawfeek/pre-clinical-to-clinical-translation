@@ -200,6 +200,21 @@ def test_braf_casestudy_panel_returns_two_axes():
     assert len(fig.axes) == 2
 
 
+def test_braf_casestudy_panel_adds_third_axis_with_drug_signal_result():
+    (coords, braf_status, domain, _sample_ids, proximity, auc, response_status, _response_ids,
+     placement_result, response_result) = _braf_casestudy_inputs()
+    drug_signal_result = {
+        "braf_status": {"r2": -0.05, "rho": 0.1, "p_value": 0.6, "n": 20, "n_splits": 5},
+        "raw_expression": {"r2": 0.2, "rho": 0.4, "p_value": 0.05, "n": 20, "n_splits": 5},
+        "embedding": {"r2": 0.02, "rho": 0.15, "p_value": 0.5, "n": 20, "n_splits": 5},
+    }
+    fig = braf_casestudy_panel(
+        coords, braf_status, domain, proximity, auc, response_status, placement_result, response_result,
+        drug_signal_result=drug_signal_result,
+    )
+    assert len(fig.axes) == 3
+
+
 def test_braf_casestudy_panel_interactive_has_two_subplots():
     (coords, braf_status, domain, sample_ids, proximity, auc, response_status, response_ids,
      _placement_result, _response_result) = _braf_casestudy_inputs()

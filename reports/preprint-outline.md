@@ -138,6 +138,21 @@ Each subsection = one row of the table below; lead each with the number and its 
   Neither R nor a manual Celligner build is available in this project's environment. Reported as a
   gap, not fabricated — see the Limitations addition below.
 - **4.8 Functional case study: weak placement, null drug-response** (BRAF/vemurafenib).
+- **4.9 The Part-B null is a sample-size/task problem, not selective information loss** (Day 26
+  drug-signal-retained probe). Within-CCLE, 5-fold cross-validated out-of-fold prediction of
+  vemurafenib AUC (n=41 SKCM lines with a PRISM readout) from three feature blocks: BRAF status
+  alone (R² = **+0.226**, ρ = **+0.130**, p = 0.42), raw 2,000-gene HVG expression (R² = **−0.041**,
+  ρ = **−0.167**, p = 0.30), and the 64-d contrastive embedding (R² = **−0.333**, ρ = **−0.187**,
+  p = 0.24). None reach significance at this n, and — the key comparison — the embedding does
+  **not** underperform raw expression by a wide margin (both are noisy/negative R² here); a single
+  categorical driver call (BRAF status alone) is nominally the best of the three. This argues
+  against "alignment selectively destroyed drug-response signal" (raw expression would then need to
+  clearly beat the embedding, and it does not) and toward "n=41 with 2,000-to-64-dimensional
+  regressors is underpowered for this continuous phenotype regardless of representation" — the
+  honest read is *inconclusive on information loss*, not a clean rescue of Part B. A descriptive,
+  unvalidated ElasticNet(CCLE raw expression → AUC) applied to the 65 TCGA-SKCM patients (no ground
+  truth exists to score it) predicts AUC 0.780 ± 0.107 (range [0.560, 1.073]), inside the CCLE
+  training range [0.560, 1.502] — a proximity-free reference point, not a validated prediction.
 
 **Evidence table (verbatim results backbone):**
 
@@ -153,6 +168,7 @@ Each subsection = one row of the table below; lead each with the number and its 
 | 4.8 | Captures BRAF-driver structure | Part A placement | Mann-Whitney **p = 0.047**; effect **0.649**, CI **[0.465, 0.834]** | Weak positive |
 | 4.8 | Proximity predicts vemurafenib response | Part B response-link | Spearman **ρ = 0.209**, CI **[−0.109, 0.493]**, p = 0.19, n=41 | **Null (honest)** |
 | 4.7 | vs incumbent method | Celligner head-to-head (identical kNN@5 metric) | Celligner **n/a** (dep unresolvable by pip/uv, needs R+mnnpy from source); PCA 65.8%/25.2%, Harmony 84.2%, ceiling 97.1%, contrastive **100%**/**78.4%** (3-/15-lineage) | *Attempted, dependency unavailable — reported honestly (§4.7, Limitations)* |
+| 4.9 | Is the Part-B null selective information loss or underpowered task? | Drug-signal-retained probe (within-CCLE 5-fold CV, n=41) | BRAF-alone R²=**+0.226**/ρ=**+0.130**; raw expr R²=**−0.041**/ρ=**−0.167**; embedding R²=**−0.333**/ρ=**−0.187** (all p>0.2) | **Inconclusive — embedding doesn't clearly underperform raw expression; n=41 is underpowered for either representation** |
 
 ## 5. Discussion
 
@@ -175,6 +191,26 @@ Each subsection = one row of the table below; lead each with the number and its 
   qualitative point stands regardless: Celligner is unsupervised and would need to *discover* lineage
   structure that our model is handed as a training signal, so a comparable retrieval number from
   Celligner would reinforce "lineage is easy," not threaten our result.
+- **Relation to CODE-AE (Day 26 update).** CODE-AE (He et al., *Nat. Mach. Intell.* 2022) is a
+  context-aware deconfounding autoencoder: it factorises cell-line and tumour representations into a
+  shared, domain-invariant code plus domain-specific "confounder" codes, trained end-to-end with a
+  drug-response *supervision* signal so the shared code is explicitly optimised to be predictive of
+  response, not just of lineage. Our encoder is the opposite on both axes: it is supervised on
+  **lineage**, not drug response, and it applies no explicit deconfounding of domain-specific,
+  response-irrelevant variation beyond what the InfoNCE objective induces incidentally. A
+  lineage-supervised, drug-agnostic embedding is therefore not *expected* to transfer to a continuous
+  drug-response phenotype — nothing in its training objective rewards preserving that signal, and
+  nothing penalises discarding it as noise relative to the lineage-separating axes it was pushed to
+  amplify. Read this way, the Part-B null is not a surprising failure but close to the a-priori
+  expectation for this architecture; it motivates exactly the kind of drug-supervised, deconfounding
+  design CODE-AE represents for any downstream drug-response transfer task, rather than suggesting
+  geometry-of-lineage embeddings are a viable substitute. The Day-26 drug-signal-retained probe
+  (§4.9) adds one clarification: the embedding does not *clearly* underperform raw expression at
+  recovering AUC out-of-fold (both are weak/negative R² at n=41), so we cannot cleanly attribute the
+  null to the embedding specifically destroying signal that raw expression uniquely retained — the
+  more defensible reading is that both representations are underpowered for a continuous phenotype at
+  this sample size, and CODE-AE's drug supervision (not just its deconfounding) is doing real work
+  that a lineage-only signal cannot substitute for.
 
 ## 6. Limitations (honest, thorough — a strength, not a disclaimer)
 
@@ -186,6 +222,12 @@ Each subsection = one row of the table below; lead each with the number and its 
   thresholds are chosen. Reported for continuity, not as a validated instrument.
 - **Small samples:** 38-line 3-lineage test; n=41 for the vemurafenib response-link. CIs given, but
   power is limited — the Part B null is "no evidence of effect," not "evidence of no effect."
+- **Drug-signal-retained probe is likewise underpowered (Day 26):** 5-fold CV on n=41 with a
+  2,000-dimensional raw-expression block leaves wide out-of-fold error; all three feature blocks
+  (BRAF status, raw expression, embedding) return non-significant R²/ρ, so §4.9 cannot distinguish
+  "the embedding retains as much signal as raw expression" from "neither representation has enough
+  data to show a real effect at this n." The ElasticNet CCLE→patient reference has no ground truth to
+  validate against and is reported descriptively only.
 - **Bulk RNA only:** no single-cell resolution; TME/stromal composition partially confounds (purity
   analysed, not eliminated).
 - **No external cohort / cross-platform (Rung 3):** all TCGA; generalisation to other cohorts and
@@ -224,7 +266,9 @@ Each subsection = one row of the table below; lead each with the number and its 
 - **F3** 15-lineage confusion heatmap with biologically-confusable pairs annotated.
 - **F4** Permutation null distribution with real value marked.
 - **F5** Purity-stratified retrieval + residualised silhouette.
-- **F6** BRAF/vemurafenib: placement scatter + proximity-vs-AUC scatter (with the null fit).
+- **F6** BRAF/vemurafenib: placement scatter + proximity-vs-AUC scatter (with the null fit) + (Day 26)
+  drug-signal-retained bar panel (R²/Spearman ρ for BRAF-status-alone vs. raw expression vs.
+  embedding), `reports/braf_vemurafenib.png` (`pctrans-casestudy-analysis`).
 - **F7 (Day 25)** Reference-method bar chart (random/PCA/Harmony/ceiling/contrastive) on the identical
   kNN@5 metric, both lineage variants; Celligner bar absent with an in-figure "dep not installed"
   note (`reports/celligner_comparison.png`, from `pctrans-celligner-compare`).
@@ -238,7 +282,8 @@ Each subsection = one row of the table below; lead each with the number and its 
       Celligner itself (dependency unresolvable in this environment — see Limitations). Revisit with a
       working Celligner install (Colab/Linux + R) before final submission if a numeric comparison is
       required by a target venue.
-- [ ] Day 26 CODE-AE positioning written (Part B situated against drug-transfer SOTA).
+- [x] Day 26 CODE-AE positioning written (Part B situated against drug-transfer SOTA); drug-signal-
+      retained probe (§4.9/F6) run on real data (n=41), reported honestly as inconclusive at this n.
 - [ ] ORCID registered; "Independent Researcher" affiliation set.
 - [ ] Preprint on bioRxiv (biology framing) or arXiv q-bio (check endorsement).
 - [ ] Verify all citations (Celligner, PRECISE, CODE-AE, SupCon, CLIP) — exact venue/year.

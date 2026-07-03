@@ -1,0 +1,39 @@
+{
+  "table": "data/processed/braf_vemurafenib.parquet",
+  "n_cell_lines_with_auc": 41,
+  "drug_signal_retained": {
+    "braf_status": {
+      "r2": 0.22617030948161398,
+      "rho": 0.1304708296437022,
+      "p_value": 0.41617830841518666,
+      "n": 41,
+      "n_splits": 5
+    },
+    "raw_expression": {
+      "r2": -0.04094510342012603,
+      "rho": -0.16689895470383279,
+      "p_value": 0.2969653549788871,
+      "n": 41,
+      "n_splits": 5
+    },
+    "embedding": {
+      "r2": -0.3330263147902466,
+      "rho": -0.1872822299651568,
+      "p_value": 0.24099007630549177,
+      "n": 41,
+      "n_splits": 5
+    }
+  },
+  "ccle_to_patient_reference": {
+    "n_train_cell_lines": 41,
+    "n_patients": 65,
+    "n_nonzero_coefs": 7,
+    "train_auc_min": 0.560200319839178,
+    "train_auc_max": 1.50223354637215,
+    "predicted_patient_auc_mean": 0.7803275480169425,
+    "predicted_patient_auc_std": 0.10724687627607107,
+    "predicted_patient_auc_min": 0.5604840505896811,
+    "predicted_patient_auc_max": 1.0732509348145747,
+    "note": "Descriptive reference only -- no ground-truth patient AUC exists to validate against."
+  }
+}
