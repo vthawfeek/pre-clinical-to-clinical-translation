@@ -71,5 +71,24 @@ def tcga(out_dir: str = "data/raw/tcga/"):
     }
 
 
+@app.command()
+def purity(out_dir: str = "data/raw/tcga/"):
+    """Download TCGA ABSOLUTE consensus purity/ploidy calls (Day 20 confounder analysis)."""
+    client = TCGAClient()
+    purity_path = client.download_purity(out_dir)
+
+    table = pd.read_csv(purity_path, sep="\t")
+    n_called = int((table["call status"] == "called").sum())
+    typer.echo(f"Purity table: {purity_path} shape={table.shape}")
+    typer.echo(f"Samples with a called purity estimate: {n_called}/{len(table)}")
+    typer.echo(f"Purity range: [{table['purity'].min():.2f}, {table['purity'].max():.2f}]")
+
+    return {
+        "purity_path": str(purity_path),
+        "shape": table.shape,
+        "n_called": n_called,
+    }
+
+
 if __name__ == "__main__":
     app()

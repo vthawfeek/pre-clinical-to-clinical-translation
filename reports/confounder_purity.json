@@ -1,0 +1,23 @@
+{
+  "embeddings": "data\\processed\\embeddings_test.npz",
+  "purity_table": "data\\raw\\tcga\\TCGA_mastercalls.abs_tables_JSedit.fixed.txt",
+  "n_tcga_with_purity": 295,
+  "n_tcga_total": 339,
+  "domain_axis_purity_correlation": {
+    "r": -0.45489447823595125,
+    "n": 333
+  },
+  "overall_knn_accuracy": 1.0,
+  "purity_stratified_knn": {
+    "high_purity": {
+      "overall_accuracy": 1.0,
+      "n": 153
+    },
+    "low_purity": {
+      "overall_accuracy": 1.0,
+      "n": 142
+    }
+  },
+  "silhouette_before_residualisation": 0.566172781210638,
+  "silhouette_after_residualisation": 0.500197899415264
+}

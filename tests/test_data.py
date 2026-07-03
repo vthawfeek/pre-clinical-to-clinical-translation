@@ -17,6 +17,9 @@ from pctrans.data.tcga_client import (
 from pctrans.data.tcga_client import (
     PHENOTYPE_FILENAME as TCGA_PHENOTYPE_FILENAME,
 )
+from pctrans.data.tcga_client import (
+    PURITY_FILENAME as TCGA_PURITY_FILENAME,
+)
 from pctrans.data.tcga_client import TCGAClient, filter_tcga_lineages
 
 
@@ -281,6 +284,13 @@ def test_tcga_download_phenotype_idempotent_when_present(tmp_path):
     dest = tmp_path / TCGA_PHENOTYPE_FILENAME
     dest.write_text("sample\tcancer type abbreviation\nTCGA-1\tLUAD\n", encoding="utf-8")
     returned = TCGAClient().download_phenotype(tmp_path)
+    assert Path(returned) == dest
+
+
+def test_tcga_download_purity_idempotent_when_present(tmp_path):
+    dest = tmp_path / TCGA_PURITY_FILENAME
+    dest.write_text("array\tpurity\nTCGA-1\t0.9\n", encoding="utf-8")
+    returned = TCGAClient().download_purity(tmp_path)
     assert Path(returned) == dest
 
 

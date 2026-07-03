@@ -309,6 +309,78 @@ def before_after_panel(
     return fig
 
 
+def purity_confounder_panel(
+    projection,
+    purity,
+    domain_labels,
+    knn_strata,
+    reference_line=None,
+    title="Tumour-purity confounder analysis",
+):
+    """Two-panel matplotlib figure for the Day 20 purity-confounder analysis.
+
+    Left: each sample's projection onto the CCLE->TCGA domain axis plotted
+    against its purity, marker = domain (CCLE cross / TCGA circle) -- shows
+    how much of the residual domain gap purity explains. Right: cross-domain
+    kNN@5 accuracy in the high- vs. low-purity TCGA strata (the
+    ``pctrans.evaluation.confounders.purity_stratified_knn`` output), with an
+    optional dashed ``reference_line`` (e.g. the unstratified overall
+    accuracy or the random baseline).
+    """
+    import matplotlib.pyplot as plt
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+
+    dom = _domain_names(domain_labels)
+    purity = np.asarray(purity, dtype=float)
+    projection = np.asarray(projection, dtype=float)
+    for domain in ("TCGA", "CCLE"):
+        mask = dom == domain
+        if not mask.any():
+            continue
+        axes[0].scatter(
+            purity[mask],
+            projection[mask],
+            marker=_DOMAIN_MARKER[domain],
+            s=50 if domain == "CCLE" else 14,
+            alpha=0.9 if domain == "CCLE" else 0.4,
+            edgecolors="black" if domain == "CCLE" else "none",
+            linewidths=0.5,
+            label=domain,
+        )
+    axes[0].set_xlabel("Tumour purity (1.0 = pure)")
+    axes[0].set_ylabel("Projection onto CCLE→TCGA domain axis")
+    axes[0].set_title("Domain axis vs. purity")
+    axes[0].legend(fontsize=9)
+
+    strata_labels, values, ns = [], [], []
+    for name in ("high_purity", "low_purity"):
+        entry = knn_strata.get(name, {})
+        acc = entry.get("overall_accuracy")
+        strata_labels.append(name.replace("_", " "))
+        values.append(acc if acc is not None else 0.0)
+        ns.append(entry.get("n", 0))
+    bars = axes[1].bar(strata_labels, values, color=["#1f77b4", "#d62728"])
+    for bar, n in zip(bars, ns):
+        axes[1].text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.02,
+            f"n={n}",
+            ha="center",
+            fontsize=9,
+        )
+    if reference_line is not None:
+        axes[1].axhline(reference_line, color="black", linestyle="--", linewidth=1, label="reference")
+        axes[1].legend(fontsize=9)
+    axes[1].set_ylim(0, 1.05)
+    axes[1].set_ylabel("kNN@5 accuracy")
+    axes[1].set_title("Retrieval by purity stratum")
+
+    fig.suptitle(title)
+    fig.tight_layout()
+    return fig
+
+
 def confusion_matrix_heatmap(confusion_matrix, labels, title="Confusion matrix", normalize=True):
     """Static matplotlib heatmap of a square confusion matrix (Day 19: 15-lineage read).
 

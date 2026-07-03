@@ -29,6 +29,15 @@ PHENOTYPE_URL = (
 PHENOTYPE_FILENAME = "Survival_SupplementalTable_S1_20171025_xena_sp.tsv"
 PHENOTYPE_MIN_BYTES = 1_000_000  # real file is ~2.4 MB; already tab-separated, not gzipped
 
+# Day 20: ABSOLUTE consensus purity/ploidy calls (Carter et al. 2012 method,
+# PanCanAtlas "mastercalls" release), hosted by GDC under a stable file UUID.
+# Keyed by `array` = sample barcode (patient + sample-type code, e.g.
+# "TCGA-OR-A5J1-01") -- the same barcode convention as our processed frame
+# index, so no ID munging is needed at join time.
+PURITY_URL = "https://api.gdc.cancer.gov/data/4f277128-f793-4354-a13d-30cc7fe9f6b5"
+PURITY_FILENAME = "TCGA_mastercalls.abs_tables_JSedit.fixed.txt"
+PURITY_MIN_BYTES = 500_000  # real file is ~900 KB, 10,786 samples
+
 
 class TCGAClient:
     """Downloads TCGA Pan-Cancer Atlas expression + phenotype from UCSC Xena (S3-hosted)."""
@@ -50,6 +59,9 @@ class TCGAClient:
 
     def download_phenotype(self, out_dir, force=False):
         return self._download(PHENOTYPE_URL, out_dir, PHENOTYPE_FILENAME, PHENOTYPE_MIN_BYTES, force)
+
+    def download_purity(self, out_dir, force=False):
+        return self._download(PURITY_URL, out_dir, PURITY_FILENAME, PURITY_MIN_BYTES, force)
 
     def _download(self, url, out_dir, filename, min_bytes, force):
         out_dir = Path(out_dir)

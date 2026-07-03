@@ -18,6 +18,7 @@ from pctrans.evaluation.viz import (  # noqa: E402
     confusion_matrix_heatmap,
     lineage_domain_scatter,
     lineage_domain_scatter_static,
+    purity_confounder_panel,
     tfs_ranking_bar,
     umap_projection,
 )
@@ -143,3 +144,16 @@ def test_confusion_matrix_heatmap_normalizes_rows():
     im = fig.axes[0].images[0]
     normalized = im.get_array()
     np.testing.assert_allclose(normalized, [[0.5, 0.5], [0.2, 0.8]])
+
+
+def test_purity_confounder_panel_returns_two_axes():
+    rng = np.random.default_rng(0)
+    projection = rng.normal(size=20)
+    purity = rng.uniform(0.2, 1.0, size=20)
+    domain = np.array([0] * 10 + [1] * 10)
+    strata = {
+        "high_purity": {"overall_accuracy": 0.9, "n": 15},
+        "low_purity": {"overall_accuracy": 0.8, "n": 14},
+    }
+    fig = purity_confounder_panel(projection, purity, domain, strata, reference_line=0.85)
+    assert len(fig.axes) == 2
