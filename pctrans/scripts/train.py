@@ -52,20 +52,34 @@ def main(
     config: str = "configs/training.yaml",
     model_config: str = "configs/model.yaml",
     data_dir: str = "data/processed/",
+    ccle_file: str = "ccle_2k.parquet",
+    tcga_file: str = "tcga_2k.parquet",
+    splits_file: str = "splits.json",
+    scalers_file: str = "scalers.pkl",
+    checkpoint_path: Optional[str] = None,
     epochs: Optional[int] = None,
     mlflow: bool = True,
 ):
-    """Train the dual-tower model; pass ``--epochs 1`` for the Gate 0 smoke run."""
+    """Train the dual-tower model; pass ``--epochs 1`` for the Gate 0 smoke run.
+
+    ``--ccle-file/--tcga-file/--splits-file/--scalers-file`` let a run point at an
+    alternate artefact set (e.g. Day 16's ``*_trainhvg`` outputs) without touching
+    the Phase-1 defaults. ``--checkpoint-path`` overrides the config's save path
+    for the same reason (so it never overwrites ``models/best_model.pt``).
+    """
     data_dir = Path(data_dir)
     train_cfg = _load_yaml(config)
     model_cfg = _load_yaml(model_config)
     n_epochs = epochs if epochs is not None else train_cfg.get("n_epochs", 30)
+    if checkpoint_path is not None:
+        train_cfg = dict(train_cfg)
+        train_cfg["checkpoint_path"] = checkpoint_path
 
-    ccle_df = pd.read_parquet(data_dir / "ccle_2k.parquet")
-    tcga_df = pd.read_parquet(data_dir / "tcga_2k.parquet")
-    with open(data_dir / "splits.json", encoding="utf-8") as f:
+    ccle_df = pd.read_parquet(data_dir / ccle_file)
+    tcga_df = pd.read_parquet(data_dir / tcga_file)
+    with open(data_dir / splits_file, encoding="utf-8") as f:
         splits = json.load(f)
-    with open(data_dir / "scalers.pkl", "rb") as f:
+    with open(data_dir / scalers_file, "rb") as f:
         scalers = pickle.load(f)
 
     splitter = DataSplitter()

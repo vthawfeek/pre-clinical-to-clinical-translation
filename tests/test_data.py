@@ -300,3 +300,60 @@ def test_save_filtered_writes_parquet_and_gene_list(tiny_ccle, tiny_tcga, tmp_pa
     assert gene_list == hvgs
     loaded = pd.read_parquet(tmp_path / "ccle_2k.parquet")
     assert list(loaded.columns) == [*hvgs, "lineage"]
+
+
+# --- Day 16: train-only HVG selection (close the leakage path) ---
+
+
+def test_hvg_train_only_ignores_test(tiny_ccle, tiny_tcga):
+    # Selecting with train_ids must match selecting on the train slice alone, and
+    # must not change when the held-out (val/test) rows are corrupted -- proving
+    # the ranking never looks at them.
+    splitter = DataSplitter()
+    splits = splitter.stratified_split(tiny_ccle, tiny_tcga)
+    train_ids = {"ccle": splits["ccle"]["train"], "tcga": splits["tcga"]["train"]}
+
+    fs = FeatureSynchroniser()
+    common = _common_genes(fs, tiny_ccle, tiny_tcga)
+
+    hvgs_via_train_ids = fs.select_hvgs(
+        tiny_ccle, tiny_tcga, common, n_hvgs=10, train_ids=train_ids
+    )
+    hvgs_via_train_slice = fs.select_hvgs(
+        tiny_ccle.loc[train_ids["ccle"]], tiny_tcga.loc[train_ids["tcga"]], common, n_hvgs=10
+    )
+    assert hvgs_via_train_ids == hvgs_via_train_slice
+
+    gene_cols = [c for c in tiny_ccle.columns if c != "lineage"]
+    corrupted_ccle = tiny_ccle.copy()
+    non_train_ccle = corrupted_ccle.index.difference(train_ids["ccle"])
+    corrupted_ccle.loc[non_train_ccle, gene_cols] = 999.0
+    corrupted_tcga = tiny_tcga.copy()
+    non_train_tcga = corrupted_tcga.index.difference(train_ids["tcga"])
+    corrupted_tcga.loc[non_train_tcga, gene_cols] = 999.0
+
+    hvgs_after_corruption = fs.select_hvgs(
+        corrupted_ccle, corrupted_tcga, common, n_hvgs=10, train_ids=train_ids
+    )
+    assert hvgs_after_corruption == hvgs_via_train_ids
+
+
+@pytest.mark.integration
+def test_hvg_flag_reproduces_phase1():
+    # --hvg-on all (train_ids=None) must reproduce the committed Day-4 gene list
+    # byte-for-byte -- the Day 16 refactor must not change the default path.
+    raw_dir = Path("data/raw")
+    gene_list_path = Path("data/processed/gene_list.txt")
+    if not raw_dir.exists() or not gene_list_path.exists():
+        pytest.skip("raw data or committed gene_list.txt not present")
+
+    fs = FeatureSynchroniser()
+    ccle_expr, _ = fs.load_ccle(raw_dir)
+    tcga_expr, _ = fs.load_tcga(raw_dir)
+    ccle_genes = [c for c in ccle_expr.columns if c != "lineage"]
+    tcga_genes = [c for c in tcga_expr.columns if c != "lineage"]
+    common_genes = fs.find_common_genes(ccle_genes, tcga_genes)
+    hvgs = fs.select_hvgs(ccle_expr, tcga_expr, common_genes, n_hvgs=2000)
+
+    expected = gene_list_path.read_text(encoding="utf-8").split()
+    assert hvgs == expected

@@ -1,0 +1,334 @@
+{
+  "model": "models/best_model_trainhvg.pt",
+  "checkpoint_epoch": 1,
+  "checkpoint_val_knn_accuracy": 0.9736842105263158,
+  "test_sizes": {
+    "ccle": 38,
+    "tcga": 339
+  },
+  "k": 5,
+  "overall_knn_accuracy": 1.0,
+  "knn_wilson_ci": {
+    "low": 0.908190131774416,
+    "high": 0.9999999999999999,
+    "n": 38
+  },
+  "knn_bootstrap_ci": {
+    "low": 1.0,
+    "high": 1.0
+  },
+  "silhouette_bootstrap_ci": {
+    "low": 0.5480955448595377,
+    "high": 0.576104140795634
+  },
+  "per_lineage_knn": {
+    "LUAD": 1.0,
+    "BRCA": 1.0,
+    "SKCM": 1.0
+  },
+  "knn_k_table": {
+    "1": 1.0,
+    "3": 1.0,
+    "5": 1.0,
+    "10": 1.0
+  },
+  "confusion_matrix": [
+    [
+      12,
+      0,
+      0
+    ],
+    [
+      0,
+      10,
+      0
+    ],
+    [
+      0,
+      0,
+      16
+    ]
+  ],
+  "confusion_labels": [
+    "LUAD",
+    "BRCA",
+    "SKCM"
+  ],
+  "silhouette_score": 0.5625283264369486,
+  "tfs_overall": 0.8906320816092371,
+  "baselines": {
+    "random": 0.3333333333333333,
+    "pca_knn": 0.6578947368421053,
+    "harmony_reference": 0.63
+  },
+  "decision": "DEPLOY",
+  "decision_band": "PASS (>=70% -> deploy path, Days 11-14)",
+  "per_cell_line_tfs": [
+    {
+      "id": "ACH-001239",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.446650420792856,
+      "tfs": 0.861662605198214
+    },
+    {
+      "id": "ACH-000425",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4403484160982367,
+      "tfs": 0.8600871040245592
+    },
+    {
+      "id": "ACH-001566",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4375108644718659,
+      "tfs": 0.8593777161179665
+    },
+    {
+      "id": "ACH-000881",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4304384700738862,
+      "tfs": 0.8576096175184715
+    },
+    {
+      "id": "ACH-000615",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4278629747344603,
+      "tfs": 0.8569657436836151
+    },
+    {
+      "id": "ACH-002005",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4245753264417236,
+      "tfs": 0.8561438316104308
+    },
+    {
+      "id": "ACH-001568",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.42455219017949863,
+      "tfs": 0.8561380475448747
+    },
+    {
+      "id": "ACH-001570",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4223378415758672,
+      "tfs": 0.8555844603939669
+    },
+    {
+      "id": "ACH-001975",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4177952648070746,
+      "tfs": 0.8544488162017687
+    },
+    {
+      "id": "ACH-001522",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.41381997819074606,
+      "tfs": 0.8534549945476866
+    },
+    {
+      "id": "ACH-002001",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.41201089700654026,
+      "tfs": 0.853002724251635
+    },
+    {
+      "id": "ACH-002928",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.40992493784536954,
+      "tfs": 0.8524812344613424
+    },
+    {
+      "id": "ACH-000219",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.40888785215356993,
+      "tfs": 0.8522219630383925
+    },
+    {
+      "id": "ACH-001972",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.4039099209144325,
+      "tfs": 0.8509774802286081
+    },
+    {
+      "id": "ACH-001981",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.3619856664129558,
+      "tfs": 0.8404964166032389
+    },
+    {
+      "id": "ACH-002847",
+      "lineage": "SKCM",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.35111123185012955,
+      "tfs": 0.8377778079625324
+    },
+    {
+      "id": "ACH-001396",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.33802445126768427,
+      "tfs": 0.8345061128169211
+    },
+    {
+      "id": "ACH-000841",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.3160502829150712,
+      "tfs": 0.8290125707287678
+    },
+    {
+      "id": "ACH-000927",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.31183857570591533,
+      "tfs": 0.8279596439264788
+    },
+    {
+      "id": "ACH-000097",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.31116132732578156,
+      "tfs": 0.8277903318314455
+    },
+    {
+      "id": "ACH-000109",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.3086421917115227,
+      "tfs": 0.8271605479278807
+    },
+    {
+      "id": "ACH-000849",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.29785815483359984,
+      "tfs": 0.8244645387084
+    },
+    {
+      "id": "ACH-000691",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.29302910414070776,
+      "tfs": 0.823257276035177
+    },
+    {
+      "id": "ACH-000352",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.2903853703459129,
+      "tfs": 0.8225963425864782
+    },
+    {
+      "id": "ACH-000521",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.28034824229048333,
+      "tfs": 0.8200870605726208
+    },
+    {
+      "id": "ACH-000578",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.2637008981748046,
+      "tfs": 0.8159252245437012
+    },
+    {
+      "id": "ACH-000062",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.26324716297244916,
+      "tfs": 0.8158117907431123
+    },
+    {
+      "id": "ACH-000021",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.2582572103482428,
+      "tfs": 0.8145643025870607
+    },
+    {
+      "id": "ACH-000888",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.2580473010010657,
+      "tfs": 0.8145118252502664
+    },
+    {
+      "id": "ACH-000785",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.2550372113604321,
+      "tfs": 0.813759302840108
+    },
+    {
+      "id": "ACH-000589",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.22625715919671324,
+      "tfs": 0.8065642897991783
+    },
+    {
+      "id": "ACH-000668",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.22242049751512108,
+      "tfs": 0.8056051243787803
+    },
+    {
+      "id": "ACH-000392",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.185372821653778,
+      "tfs": 0.7963432054134445
+    },
+    {
+      "id": "ACH-000621",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.1845313015253525,
+      "tfs": 0.7961328253813381
+    },
+    {
+      "id": "ACH-000223",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.17508110427640572,
+      "tfs": 0.7937702760691014
+    },
+    {
+      "id": "ACH-000276",
+      "lineage": "BRCA",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.14378573867379146,
+      "tfs": 0.7859464346684479
+    },
+    {
+      "id": "ACH-000757",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.13152078516958268,
+      "tfs": 0.7828801962923957
+    },
+    {
+      "id": "ACH-000264",
+      "lineage": "LUAD",
+      "knn_match_fraction": 1.0,
+      "silhouette": 0.11766858814517883,
+      "tfs": 0.7794171470362947
+    }
+  ]
+}

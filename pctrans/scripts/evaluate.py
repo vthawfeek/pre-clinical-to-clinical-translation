@@ -83,19 +83,28 @@ def _pca_knn_baseline(ccle_ds, tcga_ds, n_components=50, k=5):
 def main(
     model: str = "models/best_model.pt",
     data_dir: str = "data/processed/",
+    ccle_file: str = "ccle_2k.parquet",
+    tcga_file: str = "tcga_2k.parquet",
+    splits_file: str = "splits.json",
+    scalers_file: str = "scalers.pkl",
     model_config: str = "configs/model.yaml",
     k: int = 5,
     output: str = "reports/eval_summary.json",
 ):
-    """Evaluate the trained dual-tower model on the held-out test set (Gate 1)."""
+    """Evaluate the trained dual-tower model on the held-out test set (Gate 1).
+
+    ``--ccle-file/--tcga-file/--splits-file/--scalers-file`` let this evaluate an
+    alternate artefact set (e.g. Day 16's ``*_trainhvg`` outputs) without touching
+    the Phase-1 defaults.
+    """
     data_dir = Path(data_dir)
     model_cfg = _load_yaml(model_config)
 
-    ccle_df = pd.read_parquet(data_dir / "ccle_2k.parquet")
-    tcga_df = pd.read_parquet(data_dir / "tcga_2k.parquet")
-    with open(data_dir / "splits.json", encoding="utf-8") as f:
+    ccle_df = pd.read_parquet(data_dir / ccle_file)
+    tcga_df = pd.read_parquet(data_dir / tcga_file)
+    with open(data_dir / splits_file, encoding="utf-8") as f:
         splits = json.load(f)
-    with open(data_dir / "scalers.pkl", "rb") as f:
+    with open(data_dir / scalers_file, "rb") as f:
         scalers = pickle.load(f)
 
     splitter = DataSplitter()

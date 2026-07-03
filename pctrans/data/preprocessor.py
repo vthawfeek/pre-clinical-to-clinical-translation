@@ -97,33 +97,60 @@ class FeatureSynchroniser:
         """Set intersection of gene symbols, sorted for reproducibility."""
         return sorted(set(ccle_genes) & set(tcga_genes))
 
-    def select_hvgs(self, ccle_expr, tcga_expr, common_genes, n_hvgs=2000) -> list[str]:
+    def select_hvgs(
+        self, ccle_expr, tcga_expr, common_genes, n_hvgs=2000, train_ids=None
+    ) -> list[str]:
         """Union-rank HVG selection: average each gene's within-domain variance rank
         across CCLE and TCGA, then take the top `n_hvgs`. This gives equal weight to
         variability in each domain instead of letting TCGA's larger sample count
         dominate a pooled-variance ranking. Ties are broken alphabetically by gene
         symbol so the result is deterministic.
+
+        `train_ids` closes the last leakage path (Day 16). When ``None`` (default)
+        variance is computed over *all* samples — the Phase-1 behaviour, kept behind
+        ``pctrans-preprocess --hvg-on all`` so the original gene list stays
+        reproducible. When a ``{"ccle": [...], "tcga": [...]}`` dict of TRAIN sample
+        IDs is passed, variance is computed on the train slice of each domain only,
+        so gene selection never sees val/test samples (``--hvg-on train``).
         """
-        var_ccle = ccle_expr[common_genes].var(axis=0, ddof=1)
-        var_tcga = tcga_expr[common_genes].var(axis=0, ddof=1)
+        if train_ids is not None:
+            ccle_src = ccle_expr.loc[train_ids["ccle"]]
+            tcga_src = tcga_expr.loc[train_ids["tcga"]]
+        else:
+            ccle_src, tcga_src = ccle_expr, tcga_expr
+
+        var_ccle = ccle_src[common_genes].var(axis=0, ddof=1)
+        var_tcga = tcga_src[common_genes].var(axis=0, ddof=1)
         mean_rank = (var_ccle.rank() + var_tcga.rank()) / 2
 
         ranked = mean_rank.rename("mean_rank").rename_axis("gene").reset_index()
         ranked = ranked.sort_values(["mean_rank", "gene"], ascending=[False, True], kind="mergesort")
         return ranked["gene"].iloc[:n_hvgs].tolist()
 
-    def save_filtered(self, ccle_expr, tcga_expr, hvg_list, out_dir) -> None:
+    def save_filtered(
+        self,
+        ccle_expr,
+        tcga_expr,
+        hvg_list,
+        out_dir,
+        ccle_name="ccle_2k.parquet",
+        tcga_name="tcga_2k.parquet",
+        gene_list_name="gene_list.txt",
+    ) -> None:
         """Save both domains restricted to `hvg_list` (+ lineage) as parquet, and the
         gene list itself (one HUGO symbol per line, HVG rank order) as a text file.
+
+        The default names reproduce the Phase-1 artefacts; the train-only HVG run
+        (Day 16) passes ``*_trainhvg`` names so it never overwrites them.
         """
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
         keep_cols = [*hvg_list, "lineage"]
-        ccle_expr[keep_cols].to_parquet(out_dir / "ccle_2k.parquet")
-        tcga_expr[keep_cols].to_parquet(out_dir / "tcga_2k.parquet")
+        ccle_expr[keep_cols].to_parquet(out_dir / ccle_name)
+        tcga_expr[keep_cols].to_parquet(out_dir / tcga_name)
 
-        with open(out_dir / "gene_list.txt", "w", encoding="utf-8") as f:
+        with open(out_dir / gene_list_name, "w", encoding="utf-8") as f:
             f.write("\n".join(hvg_list) + "\n")
 
 
@@ -186,11 +213,23 @@ class DataSplitter:
             out[lineage_col] = expr_df[lineage_col].to_numpy()
         return out
 
-    def save_splits(self, splits, scalers, out_dir) -> None:
-        """Persist `splits.json` (sample IDs by domain/split) and `scalers.pkl`."""
+    def save_splits(
+        self,
+        splits,
+        scalers,
+        out_dir,
+        splits_name="splits.json",
+        scalers_name="scalers.pkl",
+    ) -> None:
+        """Persist `splits.json` (sample IDs by domain/split) and `scalers.pkl`.
+
+        Names are overridable so the train-only HVG run (Day 16) writes
+        ``splits_trainhvg.json`` / ``scalers_trainhvg.pkl`` alongside the Phase-1
+        artefacts instead of clobbering them.
+        """
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
-        with open(out_dir / "splits.json", "w", encoding="utf-8") as f:
+        with open(out_dir / splits_name, "w", encoding="utf-8") as f:
             json.dump(splits, f, indent=2)
-        with open(out_dir / "scalers.pkl", "wb") as f:
+        with open(out_dir / scalers_name, "wb") as f:
             pickle.dump(scalers, f)
