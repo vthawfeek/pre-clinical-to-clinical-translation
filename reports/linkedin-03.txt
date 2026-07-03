@@ -1,0 +1,42 @@
+I got 100% accuracy on my cancer cell line to patient alignment model. Then I spent two weeks trying
+to prove myself wrong.
+
+[attach permutation_null.png]
+
+That figure is the one negative control I trust most. It shuffles which cell-line cancer type
+corresponds to which patient cancer type, breaking the real correspondence the model's loss depends
+on, then asks it to solve the same retrieval task on nonsense labels. Across 100 shuffled runs, the
+best the model could ever do was 17-20%, and the average sat at 7.0-7.7%, right where random chance
+should be for a 15-lineage problem. My real result: 78.4%. Empirical p = 0.0099. When there is
+nothing real to find, it correctly finds nothing.
+
+That was the last of seven adversarial checks I ran against my own 100% test result:
+
+→ Multi-seed stability: 10 independent re-splits, mean kNN@5 95.0% ± 3.4%, CI [93.2%, 97.1%]. Not a
+  lucky 38-line test set.
+→ Real baselines: beats Harmony batch correction (84.2%) by 15.8 points. But a plain supervised
+  classifier with zero cross-domain alignment already hits 97.1% on the same task. My model's real
+  edge is 2.9 points. Uncomfortable, and the number I trust most because I went looking for it.
+→ Scaled to 15 lineages, including lung/colorectal/glioma pairs that are genuinely hard to tell
+  apart: accuracy drops to 78.4% (expected), and 45.8% of the errors land on the biologically
+  related pairs despite those being only 3.8% of possible mistakes. When it fails, it fails toward
+  real biology.
+→ Tumour purity confounder: ruled out. Lineage retrieval holds at 100% in both high- and
+  low-purity patient strata.
+→ Celligner head-to-head: attempted, blocked by an unresolvable dependency in the published
+  package. Reported as a gap, not hidden.
+→ Vemurafenib case study: BRAF-mutant melanoma cell lines sit weakly-but-really closer to
+  BRAF-mutant patients (p = 0.047). Whether that proximity predicts actual drug sensitivity: null
+  (p = 0.19, n = 41). I checked whether the embedding threw away that signal versus raw gene
+  expression. Neither representation could recover it at this sample size. Inconclusive, not a
+  clean rescue.
+
+None of this is a clinical claim. It has not touched an external cohort, a different sequencing
+platform, or anything prospective, and it is not meant to. What it is: a released, reproducible
+harness for stress-testing exactly this class of result before treating a clean number as biological
+insight.
+
+Full write-up, evidence table, and every daily report:
+https://github.com/vthawfeek/pre-clinical-to-clinical-translation
+
+#CancerGenomics #ContrastiveLearning #MachineLearning #Bioinformatics #OpenScience #ReproducibleResearch

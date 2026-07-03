@@ -1,0 +1,44 @@
+1/ Two weeks ago I got 100% test accuracy on a model that aligns cancer cell lines with human
+   patients. A clean result like that is a reason to get suspicious, not a reason to celebrate. So I
+   spent the next two weeks trying to break it. 🧵
+
+2/ Check 1: is 100% just a lucky 38-cell-line test set? Reran the full pipeline on 10 independent
+   random splits. Mean kNN@5 = 95.0% ± 3.4%, 95% CI [93.2%, 97.1%]. Worst seed still hit 89.5%.
+   Holds up.
+
+3/ Check 2, the uncomfortable one: does the alignment even matter? Ran real batch correction
+   (Harmony, 84.2%, beaten by +15.8 pts). Then ran a plain classifier with ZERO cross-domain
+   alignment, just CCLE-trained, tested directly on patients: 97.1%. My model's actual edge: 2.9
+   points. Coarse cancer lineage is nearly trivial to separate. This is the number that matters most.
+
+4/ Check 3: make it actually hard. Scaled from 3 to 15 cancer types, including pairs that are
+   genuinely easy to confuse (lung LUAD/LUSC, colorectal COAD/READ, glioma GBM/LGG).
+   [attach confusion_matrix_15.png]
+   kNN@5 drops to 78.4% (expected). 45.8% of all errors land on those named biological pairs,
+   despite them being only 3.8% of possible mistakes. 12x enrichment. When it's wrong, it's wrong
+   toward real biology.
+
+5/ Check 4: is this secretly detecting "pure cell culture vs contaminated tumour" instead of cancer
+   type? Correlation with tumour purity: r = -0.455, moderate. But retrieval holds at 100% in BOTH
+   high- and low-purity patient halves. Not a purity detector in disguise.
+
+6/ Check 5, the real negative control: shuffle which cell-line cancer type maps to which patient
+   cancer type, destroying the real signal. 100 shuffled runs. Best ever: 17-20%. Average: ~7%,
+   right at chance. My real result (78.4%) is nowhere near that range. p = 0.0099.
+
+7/ Check 6: tried to benchmark against Celligner, the published method for this exact problem.
+   Blocked, its PyPI package has an unresolvable dependency and the source build needs R, which I
+   don't have. Reporting that as a gap. If Celligner (unsupervised) matches me (supervised), that
+   actually supports my point, not threatens it.
+
+8/ Check 7: does any of this predict drug response? BRAF-mutant melanoma lines sit weakly closer to
+   BRAF-mutant patients (p = 0.047). Does that proximity predict vemurafenib sensitivity? No
+   (p = 0.19, n = 41). Checked embedding vs raw expression on the same task: neither recovers the
+   signal at this n. Inconclusive, not a clean rescue.
+
+9/ Where this lands: a model that reliably, robustly finds cancer lineage, mostly because that
+   turned out to be a nearly-easy signal, and that does not yet reach the drug-response question
+   that would make it clinically useful. Not a clinical tool. Not tested outside TCGA. Named as such.
+
+10/ Full evidence table + every daily report + reproducible controls harness:
+    👉 https://github.com/vthawfeek/pre-clinical-to-clinical-translation

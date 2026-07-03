@@ -263,6 +263,8 @@ Each subsection = one row of the table below; lead each with the number and its 
 
 - **F1** Before/after: PCA domain gap vs aligned UMAP (3-lineage).
 - **F2** Multi-seed kNN@5 distribution + CI; baselines + supervised ceiling bar (the pivotal panel).
+  Rendered Day 27 from `reports/multiseed_results.json` + `reports/baselines.json` (no new model
+  runs) as `reports/multiseed_baselines_panel.png`.
 - **F3** 15-lineage confusion heatmap with biologically-confusable pairs annotated.
 - **F4** Permutation null distribution with real value marked.
 - **F5** Purity-stratified retrieval + residualised silhouette.
@@ -284,6 +286,10 @@ Each subsection = one row of the table below; lead each with the number and its 
       required by a target venue.
 - [x] Day 26 CODE-AE positioning written (Part B situated against drug-transfer SOTA); drug-signal-
       retained probe (§4.9/F6) run on real data (n=41), reported honestly as inconclusive at this n.
+- [x] Day 27: full manuscript draft assembled at `reports/preprint-draft.md` (Abstract through Back
+      matter, all seven figures referenced, evidence table T2 + reference table T3 finalised); F2
+      (multi-seed distribution + baselines/ceiling bar) rendered from existing JSON, closing the one
+      figure gap left after Day 25/26. Phase 2 (Days 15–27) complete.
 - [ ] ORCID registered; "Independent Researcher" affiliation set.
 - [ ] Preprint on bioRxiv (biology framing) or arXiv q-bio (check endorsement).
 - [ ] Verify all citations (Celligner, PRECISE, CODE-AE, SupCon, CLIP) — exact venue/year.
